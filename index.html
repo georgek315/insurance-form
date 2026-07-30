@@ -77,26 +77,25 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLWlk6-KY1ktXAaoLEcA1IDQZS7aIEGXVdSCNXEYd1tSxYzhNSF6M-IQ634CjZPHa-/exec";
 
     async function loadDropdown(action, elementId) {
-    const url = SCRIPT_URL + "?v=" + Date.now() + "&action=" + action;
-    console.log("Καλώ το URL:", url); // Θα δεις το link στην κονσόλα
-
-    const response = await fetch(url);
+    const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=" + action);
     const data = await response.json();
     
-    console.log("Απάντηση για " + action + ":", data); // Θα δούμε τι περιέχει το data
-
-    // Έλεγχος αν το data είναι πίνακας πριν τρέξει το forEach
-    if (Array.isArray(data)) {
-        const select = document.getElementById(elementId);
-        data.forEach(function(item) {
-            let option = document.createElement("option");
-            option.value = item;
-            option.textContent = item;
-            select.appendChild(option);
-        });
-    } else {
-        console.error("ΠΡΟΣΟΧΗ: Το data δεν είναι πίνακας!", data);
+    const select = document.getElementById(elementId);
+    
+    // DEBUG: Εδώ θα δούμε αν όντως βρίσκει το select
+    if (!select) {
+        console.error("ΠΡΟΣΟΧΗ: Δεν βρέθηκε dropdown με ID: " + elementId);
+        return;
     }
+
+    data.forEach(function(item) {
+        let option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+    });
+    
+    console.log("Επιτυχία: Προστέθηκαν " + data.length + " επιλογές στο " + elementId);
 }
 
     async function loadModels() {
