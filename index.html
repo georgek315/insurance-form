@@ -84,10 +84,21 @@ button:hover {
 
 }
 
+
+#coversContainer label {
+
+    font-weight:normal;
+    display:block;
+    margin-bottom:8px;
+
+}
+
+
 </style>
 
 
 </head>
+
 
 
 <body>
@@ -186,7 +197,9 @@ button:hover {
 Ημερομηνία γέννησης
 </label>
 
-<input id="dob" placeholder="πχ 01/01/1980">
+<input 
+id="dob"
+placeholder="πχ 01/01/1980">
 
 
 
@@ -228,7 +241,7 @@ KW
 
 <input id="kw">
 
-
+    
 <label>
 Αξία οχήματος
 </label>
@@ -255,10 +268,15 @@ KW
 Καλύψεις
 </label>
 
-<textarea 
-id="covers"
-placeholder="πχ Οδική βοήθεια, Θραύση κρυστάλλων, Νομική προστασία">
-</textarea>
+
+<div id="coversContainer">
+
+</div>
+
+
+<input 
+type="hidden" 
+id="covers">
 
 
 
@@ -267,6 +285,7 @@ placeholder="πχ Οδική βοήθεια, Θραύση κρυστάλλων, 
 ΤΙΜΟΛΟΓΗΣΗ
 
 </button>
+
 
 
 </div>
@@ -280,33 +299,41 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGoNBxF7RkeGI5xQ3JW
 
 
 
-// =================================
-// ΓΕΝΙΚΗ ΦΟΡΤΩΣΗ DROPDOWN
-// =================================
+
+// =====================================
+// ΦΟΡΤΩΣΗ DROPDOWN ΑΠΟ GOOGLE SHEET
+// =====================================
 
 
 async function loadDropdown(action, elementId){
 
 
     const response = await fetch(
-        SCRIPT_URL + "?action=" + action
+
+        SCRIPT_URL +
+        "?action=" +
+        action
+
     );
 
 
-    const data = await response.json();
+    const data =
+    await response.json();
 
 
-    const select = document.getElementById(
-        elementId
-    );
+
+    const select =
+    document.getElementById(elementId);
+
 
 
     data.forEach(function(item){
 
 
-        let option = document.createElement(
-            "option"
-        );
+
+        let option =
+        document.createElement("option");
+
 
 
         option.value = item;
@@ -314,7 +341,9 @@ async function loadDropdown(action, elementId){
         option.textContent = item;
 
 
+
         select.appendChild(option);
+
 
 
     });
@@ -324,26 +353,30 @@ async function loadDropdown(action, elementId){
 
 
 
-// =================================
-// ΦΟΡΤΩΣΗ ΜΟΝΤΕΛΩΝ
-// =================================
+
+// =====================================
+// ΦΟΡΤΩΣΗ ΜΟΝΤΕΛΩΝ ΑΝΑ ΜΑΡΚΑ
+// =====================================
 
 
 async function loadModels(){
 
 
     const factory =
-        document.getElementById("factory").value;
+    document
+    .getElementById("factory")
+    .value;
 
 
 
     const modelSelect =
-        document.getElementById("model");
+    document
+    .getElementById("model");
 
 
 
     modelSelect.innerHTML =
-        '<option value="">-Επιλέξατε-</option>';
+    '<option value="">-Επιλέξατε-</option>';
 
 
 
@@ -355,7 +388,8 @@ async function loadModels(){
 
 
 
-    const response = await fetch(
+    const response =
+    await fetch(
 
         SCRIPT_URL +
         "?action=models&factory=" +
@@ -365,7 +399,8 @@ async function loadModels(){
 
 
 
-    const models = await response.json();
+    const models =
+    await response.json();
 
 
 
@@ -374,24 +409,24 @@ async function loadModels(){
 
 
         let option =
-            document.createElement("option");
+        document.createElement("option");
 
 
 
         option.value =
-            item.model;
+        item.model;
 
 
 
         option.textContent =
-            item.model +
-            " " +
-            item.version +
-            " (" +
-            item.engine +
-            "cc / " +
-            item.power +
-            "hp)";
+        item.model +
+        " " +
+        item.version +
+        " (" +
+        item.engine +
+        "cc / " +
+        item.power +
+        "hp)";
 
 
 
@@ -407,9 +442,148 @@ async function loadModels(){
 
 
 
-// =================================
-// ΑΡΧΙΚΗ ΦΟΡΤΩΣΗ
-// =================================
+
+// =====================================
+// ΦΟΡΤΩΣΗ ΚΑΛΥΨΕΩΝ ΑΝΑ PACKAGE
+// =====================================
+
+
+async function loadCovers(){
+
+
+    const packageName =
+    document
+    .getElementById("package")
+    .value;
+
+
+
+    const container =
+    document
+    .getElementById("coversContainer");
+
+
+
+    const hidden =
+    document
+    .getElementById("covers");
+
+
+
+    container.innerHTML = "";
+
+    hidden.value = "";
+
+
+
+    if(!packageName){
+
+        return;
+
+    }
+
+
+
+    const response =
+    await fetch(
+
+        SCRIPT_URL +
+        "?action=covers&package=" +
+        encodeURIComponent(packageName)
+
+    );
+
+
+
+    const covers =
+    await response.json();
+
+
+
+    covers.forEach(function(item){
+
+
+
+        let div =
+        document.createElement("div");
+
+
+
+        div.innerHTML = `
+
+        <label>
+
+        <input
+
+        type="checkbox"
+
+        class="coverCheck"
+
+        value="${item}"
+
+        onchange="updateCovers()">
+
+
+        ${item}
+
+
+        </label>
+
+        `;
+
+
+
+        container.appendChild(div);
+
+
+
+    });
+
+
+
+}
+
+
+
+// =====================================
+// ΕΝΗΜΕΡΩΣΗ ΚΑΛΥΨΕΩΝ CHECKBOX
+// =====================================
+
+
+function updateCovers(){
+
+
+    let selected = [];
+
+
+
+    document
+    .querySelectorAll(".coverCheck:checked")
+    .forEach(function(item){
+
+
+        selected.push(item.value);
+
+
+    });
+
+
+
+    document
+    .getElementById("covers")
+    .value =
+    selected.join(", ");
+
+
+
+}
+
+
+
+
+// =====================================
+// ΑΡΧΙΚΗ ΦΟΡΤΩΣΗ DROPDOWN
+// =====================================
 
 
 loadDropdown(
@@ -418,10 +592,12 @@ loadDropdown(
 );
 
 
+
 loadDropdown(
     "usage",
     "usage"
 );
+
 
 
 loadDropdown(
@@ -430,17 +606,19 @@ loadDropdown(
 );
 
 
+
 loadDropdown(
     "package",
     "package"
 );
 
 
-loadDropdown(
-    "covers",
-    "covers"
-);
 
+
+
+// =====================================
+// EVENTS
+// =====================================
 
 
 document
@@ -451,88 +629,122 @@ document
 );
 
 
-// =================================
-// ΑΠΟΣΤΟΛΗ ΣΤΟ GOOGLE SHEET
-// =================================
+
+document
+.getElementById("package")
+.addEventListener(
+    "change",
+    loadCovers
+);
+
+
+
+
+
+// =====================================
+// ΑΠΟΣΤΟΛΗ ΔΕΔΟΜΕΝΩΝ
+// =====================================
 
 
 async function sendData(){
 
 
+
 const data = {
+
 
 
 plate:
 document.getElementById("plate").value,
 
 
+
 duration:
 document.getElementById("duration").value,
+
 
 
 usage:
 document.getElementById("usage").value,
 
 
+
 factory:
 document.getElementById("factory").value,
+
 
 
 model:
 document.getElementById("model").value,
 
 
+
 zip:
 document.getElementById("zip").value,
+
 
 
 afm:
 document.getElementById("afm").value,
 
 
+
 dob:
 document.getElementById("dob").value,
+
 
 
 license_date:
 document.getElementById("license_date").value,
 
 
+
 first_reg:
 document.getElementById("first_reg").value,
+
 
 
 acquisition:
 document.getElementById("acquisition").value,
 
 
+
 thp:
 document.getElementById("thp").value,
+
 
 
 kw:
 document.getElementById("kw").value,
 
 
+
 value:
 document.getElementById("value").value,
+
 
 
 package:
 document.getElementById("package").value,
 
 
+
 covers:
 document.getElementById("covers").value
 
+
+
 };
+
 
 
 
 try {
 
 
-const response = await fetch(
+
+const response =
+await fetch(
 
 SCRIPT_URL,
 
@@ -553,12 +765,14 @@ await response.json();
 
 
 
+
 if(result.status === "success"){
 
 
 alert(
 "✅ Η αίτηση καταχωρήθηκε και πήγε για τιμολόγηση"
 );
+
 
 
 }
@@ -568,23 +782,29 @@ alert(
 else {
 
 
+
 alert(
 "Σφάλμα: " + result.message
 );
 
 
+
+}
+
+
+
 }
 
 
-
-}
 
 catch(error){
+
 
 
 alert(
 "Σφάλμα σύνδεσης: " + error
 );
+
 
 
 }
@@ -598,6 +818,8 @@ alert(
 </script>
 
 
+
 </body>
+
 
 </html>
