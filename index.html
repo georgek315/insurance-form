@@ -77,13 +77,15 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLWlk6-KY1ktXAaoLEcA1IDQZS7aIEGXVdSCNXEYd1tSxYzhNSF6M-IQ634CjZPHa-/exec";
 
     async function loadDropdown(action, elementId) {
-    const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=" + action);
+    const url = SCRIPT_URL + "?v=" + Date.now() + "&action=" + action;
+    console.log("Καλώ το URL:", url); // Θα δεις το link στην κονσόλα
+
+    const response = await fetch(url);
     const data = await response.json();
     
-    // Πρόσθεσε αυτή τη γραμμή για να δούμε τι φτάνει:
-    console.log("Δεδομένα για " + action + ":", data);
+    console.log("Απάντηση για " + action + ":", data); // Θα δούμε τι περιέχει το data
 
-    // Έλεγχος αν το data είναι όντως array πριν το forEach
+    // Έλεγχος αν το data είναι πίνακας πριν τρέξει το forEach
     if (Array.isArray(data)) {
         const select = document.getElementById(elementId);
         data.forEach(function(item) {
@@ -93,7 +95,7 @@
             select.appendChild(option);
         });
     } else {
-        console.error("Το data δεν είναι array:", data);
+        console.error("ΠΡΟΣΟΧΗ: Το data δεν είναι πίνακας!", data);
     }
 }
 
