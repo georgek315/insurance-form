@@ -15,9 +15,7 @@
 body {
 
     font-family: Arial, sans-serif;
-
     background:#f5f5f5;
-
     padding:20px;
 
 }
@@ -25,15 +23,18 @@ body {
 
 .container {
 
-    max-width:500px;
-
+    max-width:550px;
     margin:auto;
-
     background:white;
-
     padding:25px;
-
     border-radius:10px;
+
+}
+
+
+h2 {
+
+    text-align:center;
 
 }
 
@@ -41,31 +42,17 @@ body {
 input, select, textarea {
 
     width:100%;
-
     padding:10px;
-
     margin-top:5px;
-
     margin-bottom:15px;
+    box-sizing:border-box;
 
 }
 
 
-button {
+textarea {
 
-    width:100%;
-
-    padding:15px;
-
-    background:#1976d2;
-
-    color:white;
-
-    border:none;
-
-    border-radius:8px;
-
-    font-size:18px;
+    height:80px;
 
 }
 
@@ -77,7 +64,29 @@ label {
 }
 
 
+button {
+
+    width:100%;
+    padding:15px;
+    background:#1976d2;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:18px;
+    cursor:pointer;
+
+}
+
+
+button:hover {
+
+    background:#125aa0;
+
+}
+
+
 </style>
+
 
 </head>
 
@@ -93,12 +102,51 @@ label {
 </h2>
 
 
-
 <label>
 Πινακίδα
 </label>
 
 <input id="plate">
+
+
+
+<label>
+Διάρκεια
+</label>
+
+<input id="duration" value="12">
+
+
+
+<label>
+Χρήση
+</label>
+
+<input id="usage" value="1">
+
+
+
+<label>
+Μάρκα
+</label>
+
+<input id="factory">
+
+
+
+<label>
+Μοντέλο
+</label>
+
+<input id="model">
+
+
+
+<label>
+ΤΚ
+</label>
+
+<input id="zip">
 
 
 
@@ -143,7 +191,7 @@ label {
 
 
 <label>
-Κυβικά
+Κυβικά / THP
 </label>
 
 <input id="thp">
@@ -172,13 +220,16 @@ KW
 
 <select id="package">
 
+
 <option value="BASIC">
 BASIC
 </option>
 
+
 <option value="FULL">
 FULL
 </option>
+
 
 </select>
 
@@ -189,7 +240,7 @@ FULL
 </label>
 
 <textarea id="covers"
-placeholder="πχ Οδική βοήθεια, Θραύση κρυστάλλων">
+placeholder="πχ Οδική βοήθεια, Θραύση κρυστάλλων, Νομική προστασία">
 </textarea>
 
 
@@ -205,111 +256,153 @@ placeholder="πχ Οδική βοήθεια, Θραύση κρυστάλλων">
 </div>
 
 
+
 <script>
 
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM4Wx7cto79p_Ua9YFzuhZGdSNWhrq3B3K4Wuq2mMqApi8jOCV1IDeDLJInHQJ0fK7/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycnH3SmvLYN1_ziEksaqLcOs7KQ-j3mkiIVh-PR37-V_mVu_PsrJsWllXFnJHr9R-t/exec";
+
 
 
 async function sendData(){
 
 
-    const data = {
-
-        plate: document.getElementById("plate").value,
-
-        afm: document.getElementById("afm").value,
-
-        dob: document.getElementById("dob").value,
-
-        license_date: document.getElementById("license_date").value,
-
-        first_reg: document.getElementById("first_reg").value,
-
-        acquisition: document.getElementById("acquisition").value,
-
-        thp: document.getElementById("thp").value,
-
-        kw: document.getElementById("kw").value,
-
-        value: document.getElementById("value").value,
-
-        package: document.getElementById("package").value,
-
-        covers: document.getElementById("covers").value,
+const data = {
 
 
-        // προσωρινές προεπιλογές
-        duration: "12",
-
-        usage: "1",
-
-        factory: "",
-
-        model: "",
-
-        zip: "",
-
-        cc: ""
-
-    };
+plate:
+document.getElementById("plate").value,
 
 
-    try {
+duration:
+document.getElementById("duration").value,
 
 
-        let response = await fetch(
-
-            SCRIPT_URL,
-
-            {
-
-                method:"POST",
-
-                body: JSON.stringify(data)
-
-            }
-
-        );
+usage:
+document.getElementById("usage").value,
 
 
-        let result = await response.json();
+factory:
+document.getElementById("factory").value,
 
 
-        if(result.status === "success"){
+model:
+document.getElementById("model").value,
 
 
-            alert(
-                "✅ Η αίτηση καταχωρήθηκε"
-            );
+zip:
+document.getElementById("zip").value,
 
 
-        } else {
+afm:
+document.getElementById("afm").value,
 
 
-            alert(
-                "Σφάλμα: " + result.message
-            );
+dob:
+document.getElementById("dob").value,
 
 
-        }
+license_date:
+document.getElementById("license_date").value,
 
 
-    } catch(error){
+first_reg:
+document.getElementById("first_reg").value,
 
 
-        alert(
-            "Σφάλμα σύνδεσης: " + error
-        );
+acquisition:
+document.getElementById("acquisition").value,
 
 
-    }
+thp:
+document.getElementById("thp").value,
+
+
+kw:
+document.getElementById("kw").value,
+
+
+value:
+document.getElementById("value").value,
+
+
+package:
+document.getElementById("package").value,
+
+
+covers:
+document.getElementById("covers").value
+
+};
+
+
+
+try {
+
+
+const response = await fetch(
+
+SCRIPT_URL,
+
+{
+
+method:"POST",
+
+body:JSON.stringify(data)
 
 }
+
+);
+
+
+
+const result = await response.json();
+
+
+
+if(result.status === "success"){
+
+
+alert(
+"✅ Η αίτηση καταχωρήθηκε και πήγε για τιμολόγηση"
+);
+
+
+}
+
+
+else {
+
+
+alert(
+"Σφάλμα: " + result.message
+);
+
+
+}
+
+
+
+}
+
+catch(error){
+
+
+alert(
+"Σφάλμα σύνδεσης: " + error
+);
+
+
+}
+
+
+}
+
 
 </script>
 
 
 </body>
+
 
 </html>
