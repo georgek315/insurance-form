@@ -452,104 +452,79 @@ async function loadCovers(){
 
     alert("Μπήκε στη loadCovers");
 
-    const covers = await response.json();
-    console.log("package:", packageName);
-    console.log("covers:", covers)
-
-    alert(JSON.stringify(covers));
 
     const packageName =
-    document
-    .getElementById("package")
-    .value;
-
+    document.getElementById("package").value;
 
 
     const container =
-    document
-    .getElementById("coversContainer");
-
+    document.getElementById("coversContainer");
 
 
     const hidden =
-    document
-    .getElementById("covers");
-
+    document.getElementById("covers");
 
 
     container.innerHTML = "";
-
     hidden.value = "";
 
 
-
     if(!packageName){
-
         return;
-
     }
-
 
 
     const response =
     await fetch(
-
-        SCRIPT_URL +
-        "?action=covers&package=" +
-        encodeURIComponent(packageName)
-
+        SCRIPT_URL 
+        + "?action=covers&package="
+        + encodeURIComponent(packageName)
     );
-
 
 
     const covers =
     await response.json();
 
 
+    console.log("PACKAGE:", packageName);
+    console.log("COVERS:", covers);
+
+
+    alert(JSON.stringify(covers));
+
+
 
     covers.forEach(function(item){
-
 
 
         let div =
         document.createElement("div");
 
 
-
         div.innerHTML = `
 
         <label>
 
-        <input
-
-        type="checkbox"
-
-        class="coverCheck"
-
-        value="${item}"
-
+        <input 
+        type="checkbox" 
+        class="coverCheck" 
+        value="${item}" 
         onchange="updateCovers()">
 
-
         ${item}
-
 
         </label>
 
         `;
 
 
-
         container.appendChild(div);
-
 
 
     });
 
 
-
 }
-
 
 
 // =====================================
