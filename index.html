@@ -208,16 +208,104 @@ placeholder="πχ Οδική βοήθεια, Θραύση κρυστάλλων">
 <script>
 
 
-function sendData(){
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM4Wx7cto79p_Ua9YFzuhZGdSNWhrq3B3K4Wuq2mMqApi8jOCV1IDeDLJInHQJ0fK7/exec";
 
 
-alert(
-"Η φόρμα είναι έτοιμη - επόμενο βήμα σύνδεση με Sheet"
-);
+async function sendData(){
 
+
+    const data = {
+
+        plate: document.getElementById("plate").value,
+
+        afm: document.getElementById("afm").value,
+
+        dob: document.getElementById("dob").value,
+
+        license_date: document.getElementById("license_date").value,
+
+        first_reg: document.getElementById("first_reg").value,
+
+        acquisition: document.getElementById("acquisition").value,
+
+        thp: document.getElementById("thp").value,
+
+        kw: document.getElementById("kw").value,
+
+        value: document.getElementById("value").value,
+
+        package: document.getElementById("package").value,
+
+        covers: document.getElementById("covers").value,
+
+
+        // προσωρινές προεπιλογές
+        duration: "12",
+
+        usage: "1",
+
+        factory: "",
+
+        model: "",
+
+        zip: "",
+
+        cc: ""
+
+    };
+
+
+    try {
+
+
+        let response = await fetch(
+
+            SCRIPT_URL,
+
+            {
+
+                method:"POST",
+
+                body: JSON.stringify(data)
+
+            }
+
+        );
+
+
+        let result = await response.json();
+
+
+        if(result.status === "success"){
+
+
+            alert(
+                "✅ Η αίτηση καταχωρήθηκε"
+            );
+
+
+        } else {
+
+
+            alert(
+                "Σφάλμα: " + result.message
+            );
+
+
+        }
+
+
+    } catch(error){
+
+
+        alert(
+            "Σφάλμα σύνδεσης: " + error
+        );
+
+
+    }
 
 }
-
 
 </script>
 
