@@ -77,8 +77,14 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLWlk6-KY1ktXAaoLEcA1IDQZS7aIEGXVdSCNXEYd1tSxYzhNSF6M-IQ634CjZPHa-/exec";
 
     async function loadDropdown(action, elementId) {
-        const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=" + action);
-        const data = await response.json();
+    const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=" + action);
+    const data = await response.json();
+    
+    // Πρόσθεσε αυτή τη γραμμή για να δούμε τι φτάνει:
+    console.log("Δεδομένα για " + action + ":", data);
+
+    // Έλεγχος αν το data είναι όντως array πριν το forEach
+    if (Array.isArray(data)) {
         const select = document.getElementById(elementId);
         data.forEach(function(item) {
             let option = document.createElement("option");
@@ -86,7 +92,10 @@
             option.textContent = item;
             select.appendChild(option);
         });
+    } else {
+        console.error("Το data δεν είναι array:", data);
     }
+}
 
     async function loadModels() {
         const factory = document.getElementById("factory").value;
