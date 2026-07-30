@@ -452,6 +452,10 @@ async function loadCovers(){
 
     alert("Μπήκε στη loadCovers");
 
+    const covers = await response.json();
+
+    alert(JSON.stringify(covers));
+
     const packageName =
     document
     .getElementById("package")
