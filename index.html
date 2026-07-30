@@ -311,6 +311,7 @@ async function loadDropdown(action, elementId){
     const response = await fetch(
 
         SCRIPT_URL +
+        "?v=" + Date.now() +
         "?action=" +
         action
 
@@ -392,6 +393,7 @@ async function loadModels(){
     await fetch(
 
         SCRIPT_URL +
+        "?v=" + Date.now() +
         "?action=models&factory=" +
         encodeURIComponent(factory)
 
@@ -477,6 +479,7 @@ async function loadCovers(){
     const response =
     await fetch(
         SCRIPT_URL 
+        + "?v=" + Date.now()
         + "?action=covers&package="
         + encodeURIComponent(packageName)
     );
