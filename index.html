@@ -1,810 +1,169 @@
 <!DOCTYPE html>
 <html lang="el">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Νέα Τιμολόγηση</title>
-
-
 <style>
-
-body {
-
-    font-family: Arial, sans-serif;
-    background:#f5f5f5;
-    padding:20px;
-
-}
-
-
-.container {
-
-    max-width:550px;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border-radius:10px;
-
-}
-
-
-h2 {
-
-    text-align:center;
-
-}
-
-
-input, select, textarea {
-
-    width:100%;
-    padding:10px;
-    margin-top:5px;
-    margin-bottom:15px;
-    box-sizing:border-box;
-
-}
-
-
-textarea {
-
-    height:80px;
-
-}
-
-
-label {
-
-    font-weight:bold;
-
-}
-
-
-button {
-
-    width:100%;
-    padding:15px;
-    background:#1976d2;
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:18px;
-    cursor:pointer;
-
-}
-
-
-button:hover {
-
-    background:#125aa0;
-
-}
-
-
-#coversContainer label {
-
-    font-weight:normal;
-    display:block;
-    margin-bottom:8px;
-
-}
-
-
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 550px; margin: auto; background: white; padding: 25px; border-radius: 10px; }
+    h2 { text-align: center; }
+    input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; box-sizing: border-box; }
+    textarea { height: 80px; }
+    label { font-weight: bold; }
+    button { width: 100%; padding: 15px; background: #1976d2; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
+    button:hover { background: #125aa0; }
+    #coversContainer label { font-weight: normal; display: block; margin-bottom: 8px; }
 </style>
-
-
 </head>
-
-
-
 <body>
 
-
 <div class="container">
+    <h2>Νέα Τιμολόγηση</h2>
 
+    <label>Πινακίδα</label>
+    <input id="plate">
 
-<h2>
-Νέα Τιμολόγηση
-</h2>
+    <label>Διάρκεια</label>
+    <select id="duration"><option value="">-Επιλέξατε-</option></select>
 
+    <label>Χρήση</label>
+    <select id="usage"><option value="">-Επιλέξατε-</option></select>
 
+    <label>Μάρκα</label>
+    <select id="factory"><option value="">-Επιλέξατε-</option></select>
 
-<label>
-Πινακίδα
-</label>
+    <label>Μοντέλο</label>
+    <select id="model"><option value="">-Επιλέξατε-</option></select>
 
-<input id="plate">
+    <label>ΤΚ</label>
+    <input id="zip">
 
+    <label>ΑΦΜ</label>
+    <input id="afm">
 
+    <label>Ημερομηνία γέννησης</label>
+    <input id="dob" placeholder="πχ 01/01/1980">
 
-<label>
-Διάρκεια
-</label>
+    <label>Ημερομηνία διπλώματος</label>
+    <input id="license_date">
 
-<select id="duration">
+    <label>Πρώτη κυκλοφορία</label>
+    <input id="first_reg">
 
-<option value="">
--Επιλέξατε-
-</option>
+    <label>Ημερομηνία αγοράς</label>
+    <input id="acquisition">
 
-</select>
+    <label>Κυβικά / THP</label>
+    <input id="thp">
 
+    <label>KW</label>
+    <input id="kw">
 
+    <label>Αξία οχήματος</label>
+    <input id="value">
 
-<label>
-Χρήση
-</label>
+    <label>Πακέτο</label>
+    <select id="package"><option value="">-Επιλέξατε-</option></select>
 
-<select id="usage">
+    <label>Καλύψεις</label>
+    <div id="coversContainer"></div>
+    <input type="hidden" id="covers">
 
-<option value="">
--Επιλέξατε-
-</option>
-
-</select>
-
-
-
-<label>
-Μάρκα
-</label>
-
-<select id="factory">
-
-<option value="">
--Επιλέξατε-
-</option>
-
-</select>
-
-
-
-<label>
-Μοντέλο
-</label>
-
-<select id="model">
-
-<option value="">
--Επιλέξατε-
-</option>
-
-</select>
-
-
-
-<label>
-ΤΚ
-</label>
-
-<input id="zip">
-
-
-
-<label>
-ΑΦΜ
-</label>
-
-<input id="afm">
-
-
-
-<label>
-Ημερομηνία γέννησης
-</label>
-
-<input 
-id="dob"
-placeholder="πχ 01/01/1980">
-
-
-
-<label>
-Ημερομηνία διπλώματος
-</label>
-
-<input id="license_date">
-
-
-
-<label>
-Πρώτη κυκλοφορία
-</label>
-
-<input id="first_reg">
-
-
-
-<label>
-Ημερομηνία αγοράς
-</label>
-
-<input id="acquisition">
-
-
-
-<label>
-Κυβικά / THP
-</label>
-
-<input id="thp">
-
-
-
-<label>
-KW
-</label>
-
-<input id="kw">
-
-    
-<label>
-Αξία οχήματος
-</label>
-
-<input id="value">
-
-
-
-<label>
-Πακέτο
-</label>
-
-<select id="package">
-
-<option value="">
--Επιλέξατε-
-</option>
-
-</select>
-
-
-
-<label>
-Καλύψεις
-</label>
-
-
-<div id="coversContainer">
-
+    <button onclick="sendData()">ΤΙΜΟΛΟΓΗΣΗ</button>
 </div>
-
-
-<input 
-type="hidden" 
-id="covers">
-
-
-
-<button onclick="sendData()">
-
-ΤΙΜΟΛΟΓΗΣΗ
-
-</button>
-
-
-
-</div>
-
-
 
 <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLWlk6-KY1ktXAaoLEcA1IDQZS7aIEGXVdSCNXEYd1tSxYzhNSF6M-IQ634CjZPHa-/exec";
 
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLWlk6-KY1ktXAaoLEcA1IDQZS7aIEGXVdSCNXEYd1tSxYzhNSF6M-IQ634CjZPHa-/exec";
-
-
-
-
-// =====================================
-// ΦΟΡΤΩΣΗ DROPDOWN ΑΠΟ GOOGLE SHEET
-// =====================================
-
-
-async function loadDropdown(action, elementId){
-
-
-    const response = await fetch(
-
-        SCRIPT_URL +
-        "?v=" + Date.now() +
-        "?action=" +
-        action
-
-    );
-
-
-    const data =
-    await response.json();
-
-
-
-    const select =
-    document.getElementById(elementId);
-
-
-
-    data.forEach(function(item){
-
-
-
-        let option =
-        document.createElement("option");
-
-
-
-        option.value = item;
-
-        option.textContent = item;
-
-
-
-        select.appendChild(option);
-
-
-
-    });
-
-
-}
-
-
-
-
-// =====================================
-// ΦΟΡΤΩΣΗ ΜΟΝΤΕΛΩΝ ΑΝΑ ΜΑΡΚΑ
-// =====================================
-
-
-async function loadModels(){
-
-
-    const factory =
-    document
-    .getElementById("factory")
-    .value;
-
-
-
-    const modelSelect =
-    document
-    .getElementById("model");
-
-
-
-    modelSelect.innerHTML =
-    '<option value="">-Επιλέξατε-</option>';
-
-
-
-    if(!factory){
-
-        return;
-
+    async function loadDropdown(action, elementId) {
+        const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=" + action);
+        const data = await response.json();
+        const select = document.getElementById(elementId);
+        data.forEach(function(item) {
+            let option = document.createElement("option");
+            option.value = item;
+            option.textContent = item;
+            select.appendChild(option);
+        });
     }
 
+    async function loadModels() {
+        const factory = document.getElementById("factory").value;
+        const modelSelect = document.getElementById("model");
+        modelSelect.innerHTML = '<option value="">-Επιλέξατε-</option>';
+        if(!factory) return;
 
-
-    const response =
-    await fetch(
-
-        SCRIPT_URL +
-        "?v=" + Date.now() +
-        "?action=models&factory=" +
-        encodeURIComponent(factory)
-
-    );
-
-
-
-    const models =
-    await response.json();
-
-
-
-    models.forEach(function(item){
-
-
-
-        let option =
-        document.createElement("option");
-
-
-
-        option.value =
-        item.model;
-
-
-
-        option.textContent =
-        item.model +
-        " " +
-        item.version +
-        " (" +
-        item.engine +
-        "cc / " +
-        item.power +
-        "hp)";
-
-
-
-        modelSelect.appendChild(option);
-
-
-
-    });
-
-
-
-}
-
-
-
-
-// =====================================
-// ΦΟΡΤΩΣΗ ΚΑΛΥΨΕΩΝ ΑΝΑ PACKAGE
-// =====================================
-
-
-async function loadCovers(){
-
-    
-
-
-    const packageName =
-    document.getElementById("package").value;
-
-
-    const container =
-    document.getElementById("coversContainer");
-
-
-    const hidden =
-    document.getElementById("covers");
-
-
-    container.innerHTML = "";
-    hidden.value = "";
-
-
-    if(!packageName){
-        return;
+        const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=models&factory=" + encodeURIComponent(factory));
+        const models = await response.json();
+        models.forEach(function(item) {
+            let option = document.createElement("option");
+            option.value = item.model;
+            option.textContent = item.model + " " + item.version + " (" + item.engine + "cc / " + item.power + "hp)";
+            modelSelect.appendChild(option);
+        });
     }
 
-
-    const response =
-    await fetch(
-        SCRIPT_URL 
-        + "?v=" + Date.now()
-        + "?action=covers&package="
-        + encodeURIComponent(packageName)
-    );
-
-
-    const covers =
-    await response.json();
-
-
-    console.log("PACKAGE:", packageName);
-    console.log("COVERS:", covers);
-
-
-   
-
-
-
-    covers.forEach(function(item){
-
-
-        let div =
-        document.createElement("div");
-
-
-        div.innerHTML = `
-
-        <label>
-
-        <input 
-        type="checkbox" 
-        class="coverCheck" 
-        value="${item}" 
-        onchange="updateCovers()">
-
-        ${item}
-
-        </label>
-
-        `;
-
-
-        container.appendChild(div);
-
-
-    });
-
-
-}
-
-
-// =====================================
-// ΕΝΗΜΕΡΩΣΗ ΚΑΛΥΨΕΩΝ CHECKBOX
-// =====================================
-
-
-function updateCovers(){
-
-
-    let selected = [];
-
-
-
-    document
-    .querySelectorAll(".coverCheck:checked")
-    .forEach(function(item){
-
-
-        selected.push(item.value);
-
-
-    });
-
-
-
-    document
-    .getElementById("covers")
-    .value =
-    selected.join(", ");
-
-
-
-}
-
-
-
-
-// =====================================
-// ΑΡΧΙΚΗ ΦΟΡΤΩΣΗ DROPDOWN
-// =====================================
-
-
-loadDropdown(
-    "factory",
-    "factory"
-);
-
-
-
-loadDropdown(
-    "usage",
-    "usage"
-);
-
-
-
-loadDropdown(
-    "duration",
-    "duration"
-);
-
-
-
-loadDropdown(
-    "package",
-    "package"
-);
-
-
-
-
-
-// =====================================
-// EVENTS
-// =====================================
-
-
-document
-.getElementById("factory")
-.addEventListener(
-    "change",
-    loadModels
-);
-
-
-
-document
-.getElementById("package")
-.addEventListener(
-    "change",
-    loadCovers
-);
-
-
-
-
-
-// =====================================
-// ΑΠΟΣΤΟΛΗ ΔΕΔΟΜΕΝΩΝ
-// =====================================
-
-
-async function sendData(){
-
-
-
-const data = {
-
-
-
-plate:
-document.getElementById("plate").value,
-
-
-
-duration:
-document.getElementById("duration").value,
-
-
-
-usage:
-document.getElementById("usage").value,
-
-
-
-factory:
-document.getElementById("factory").value,
-
-
-
-model:
-document.getElementById("model").value,
-
-
-
-zip:
-document.getElementById("zip").value,
-
-
-
-afm:
-document.getElementById("afm").value,
-
-
-
-dob:
-document.getElementById("dob").value,
-
-
-
-license_date:
-document.getElementById("license_date").value,
-
-
-
-first_reg:
-document.getElementById("first_reg").value,
-
-
-
-acquisition:
-document.getElementById("acquisition").value,
-
-
-
-thp:
-document.getElementById("thp").value,
-
-
-
-kw:
-document.getElementById("kw").value,
-
-
-
-value:
-document.getElementById("value").value,
-
-
-
-package:
-document.getElementById("package").value,
-
-
-
-covers:
-document.getElementById("covers").value
-
-
-
-};
-
-
-
-
-try {
-
-
-
-const response =
-await fetch(
-
-SCRIPT_URL,
-
-{
-
-method:"POST",
-
-body:JSON.stringify(data)
-
-}
-
-);
-
-
-
-const result =
-await response.json();
-
-
-
-
-if(result.status === "success"){
-
-
-alert(
-"✅ Η αίτηση καταχωρήθηκε και πήγε για τιμολόγηση"
-);
-
-
-
-}
-
-
-
-else {
-
-
-
-alert(
-"Σφάλμα: " + result.message
-);
-
-
-
-}
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-alert(
-"Σφάλμα σύνδεσης: " + error
-);
-
-
-
-}
-
-
-
-}
-
-
-
+    async function loadCovers() {
+        const packageName = document.getElementById("package").value;
+        const container = document.getElementById("coversContainer");
+        const hidden = document.getElementById("covers");
+        container.innerHTML = "";
+        hidden.value = "";
+        if(!packageName) return;
+
+        const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=covers&package=" + encodeURIComponent(packageName));
+        const covers = await response.json();
+        covers.forEach(function(item) {
+            let div = document.createElement("div");
+            div.innerHTML = `<label><input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> ${item}</label>`;
+            container.appendChild(div);
+        });
+    }
+
+    function updateCovers() {
+        let selected = [];
+        document.querySelectorAll(".coverCheck:checked").forEach(function(item) { selected.push(item.value); });
+        document.getElementById("covers").value = selected.join(", ");
+    }
+
+    // Αρχική φόρτωση
+    loadDropdown("factory", "factory");
+    loadDropdown("usage", "usage");
+    loadDropdown("duration", "duration");
+    loadDropdown("package", "package");
+
+    // Events
+    document.getElementById("factory").addEventListener("change", loadModels);
+    document.getElementById("package").addEventListener("change", loadCovers);
+
+    async function sendData() {
+        const data = {
+            plate: document.getElementById("plate").value,
+            duration: document.getElementById("duration").value,
+            usage: document.getElementById("usage").value,
+            factory: document.getElementById("factory").value,
+            model: document.getElementById("model").value,
+            zip: document.getElementById("zip").value,
+            afm: document.getElementById("afm").value,
+            dob: document.getElementById("dob").value,
+            license_date: document.getElementById("license_date").value,
+            first_reg: document.getElementById("first_reg").value,
+            acquisition: document.getElementById("acquisition").value,
+            thp: document.getElementById("thp").value,
+            kw: document.getElementById("kw").value,
+            value: document.getElementById("value").value,
+            package: document.getElementById("package").value,
+            covers: document.getElementById("covers").value
+        };
+
+        try {
+            const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
+            const result = await response.json();
+            if(result.status === "success") { alert("✅ Η αίτηση καταχωρήθηκε και πήγε για τιμολόγηση"); }
+            else { alert("Σφάλμα: " + result.message); }
+        } catch(error) { alert("Σφάλμα σύνδεσης: " + error); }
+    }
 </script>
-
-
-
 </body>
-
-
 </html>
