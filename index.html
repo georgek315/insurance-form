@@ -9,13 +9,10 @@
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         h2 { text-align: center; color: #1976d2; margin-bottom: 30px; }
 
-        /* Grid Layout */
         .form-grid { display: grid; grid-template-columns: 160px 1fr; gap: 15px; align-items: center; }
-        
         label { font-weight: 600; color: #444; text-align: right; font-size: 0.9em; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; }
         
-        /* Covers styling */
         #coversContainer { grid-column: 2; border: 1px solid #ddd; border-radius: 4px; background: #fff; max-height: 200px; overflow-y: auto; padding: 5px; }
         .cover-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .cover-item:hover { background-color: #f1f8ff; }
@@ -60,10 +57,14 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysguM72PFm-nPnYc2fQOozpFn87Ife1IEhD-WSSlcYk1wJZ6RSvnBXv1SiutWftbJ-/exec";
 
-    // --- LOGIC ΓΙΑ DATE FORMAT & AFM PADDING ---
     function formatData(data) {
-        if (data.afm) data.afm = data.afm.toString().padStart(9, '0');
+        // 1. Διόρθωση ΑΦΜ (强制 μετατροπή σε string και padding)
+        if (data.afm) {
+            let strAfm = String(data.afm).trim();
+            data.afm = strAfm.padStart(9, '0');
+        }
         
+        // 2. Format Ημερομηνιών
         const dateFields = ['dob', 'license_date', 'first_reg', 'acquisition'];
         dateFields.forEach(field => {
             if (data[field]) {
@@ -74,23 +75,25 @@
         return data;
     }
 
-    // --- ΔΙΑΧΕΙΡΙΣΗ ΥΠΟΒΟΛΗΣ ---
     document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitBtn");
-        btn.disabled = true;
-        btn.textContent = "Αποστολή...";
-
+        
         let data = Object.fromEntries(new FormData(e.target).entries());
         data = formatData(data);
+        
+        // DEBUG: Δες τι στέλνεις στην κονσόλα (F12)
+        console.log("Δεδομένα προς αποστολή:", data);
+        
+        btn.disabled = true;
+        btn.textContent = "Αποστολή...";
 
         try {
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
-            
             if(result.status === "success") {
                 alert("✅ Η αίτηση καταχωρήθηκε!");
-                e.target.reset(); // Καθαρισμός
+                e.target.reset();
             } else {
                 alert("Σφάλμα: " + result.message);
             }
@@ -101,7 +104,7 @@
         }
     });
 
-    // --- ΛΟΓΙΚΗ DROPDOWNS ---
+    // --- ΛΟΓΙΚΗ DROPDOWNS (Δεν άλλαξε) ---
     async function loadDropdown(action, elementId) {
         const select = document.getElementById(elementId);
         try {
@@ -120,7 +123,6 @@
         const factory = document.getElementById("factory").value;
         const modelSelect = document.getElementById("model");
         if(!factory) return;
-        
         const response = await fetch(`${SCRIPT_URL}?action=models&factory=${encodeURIComponent(factory)}`);
         const models = await response.json();
         modelSelect.innerHTML = '<option value="">-Επιλέξτε-</option>';
@@ -157,7 +159,6 @@
         document.getElementById("covers").value = selected.join(", ");
     }
 
-    // Initialization
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
     document.getElementById("package").addEventListener("change", loadCovers);
