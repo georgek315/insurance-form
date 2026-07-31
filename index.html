@@ -43,7 +43,7 @@
         <label>Ημ. Απόκτησης:</label> <input type="date" id="acquisition" name="acquisition">
         <label>Φ.Ιπποι:</label> <input type="text" id="thp" name="thp">
         <label>KW:</label> <input type="text" id="kw" name="kw">
-        <label>Αξία οχήματος:</label> <input type="number" id="value" name="value">
+        <label>Αξία οχήματος:</label> <input type="number" id="value" name="value" min="0">
         
         <label>Πακέτο:</label> <select id="package" name="package"></select>
         <label>Καλύψεις:</label> 
@@ -51,43 +51,21 @@
         <input type="hidden" id="covers" name="covers">
 
         <button type="submit" id="submitBtn" class="btn-main">Αποθήκευση</button>
-        <div id="statusBox" style="
-display:none;
-margin-top:20px;
-padding:15px;
-border-radius:8px;
-background:#f1f8ff;
-border:1px solid #90caf9;
-font-size:15px;
-line-height:1.6;
-white-space:pre-line;
-">
-</div>
-
-        <div id="resultBox" 
-style="
-margin-top:20px;
-padding:15px;
-border-radius:8px;
-background:#f1f8ff;
-display:none;
-white-space:pre-line;
-">
-</div>
+        
+        <div id="statusBox" style="display:none; margin-top:20px; padding:15px; border-radius:8px; background:#f1f8ff; border:1px solid #90caf9; font-size:15px; line-height:1.6; white-space:pre-line;"></div>
+        <div id="resultBox" style="margin-top:20px; padding:15px; border-radius:8px; background:#f1f8ff; display:none; white-space:pre-line;"></div>
     </form>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSQrlsy4053DBrOz0r8yy16WUtRwH2LRxjiwkGv3_eoLEN45Al945SU_Sj-wBxRHIb/exec";
+    let checkTimer = null;
 
     function formatData(data) {
-        // 1. Διόρθωση ΑΦΜ (强制 μετατροπή σε string και padding)
         if (data.afm) {
             let strAfm = String(data.afm).trim();
             data.afm = strAfm.padStart(9, '0');
         }
-        
-        // 2. Format Ημερομηνιών
         const dateFields = ['dob', 'license_date', 'first_reg', 'acquisition'];
         dateFields.forEach(field => {
             if (data[field]) {
@@ -101,12 +79,8 @@ white-space:pre-line;
     document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitBtn");
-        
         let data = Object.fromEntries(new FormData(e.target).entries());
         data = formatData(data);
-        
-        // DEBUG: Δες τι στέλνεις στην κονσόλα (F12)
-        console.log("Δεδομένα προς αποστολή:", data);
         
         btn.disabled = true;
         btn.textContent = "Αποστολή...";
@@ -115,33 +89,12 @@ white-space:pre-line;
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
             if(result.status === "success") {
-
-
-    const statusBox = document.getElementById("statusBox");
-
-
-    statusBox.style.display = "block";
-
-
-    statusBox.innerHTML =
-    "✅ Η αίτηση καταχωρήθηκε\n\n" +
-    "🟡 Η τιμολόγηση ξεκίνησε...\n\n" +
-    "Παρακαλώ περιμένετε περίπου 2-3 λεπτά.";
-
-
-    localStorage.setItem(
-        "lastPlate",
-        data.plate
-    );
-
-
-    e.target.reset();
-
-
-    startCheckingResult();
-
-
-}
+                const statusBox = document.getElementById("statusBox");
+                statusBox.style.display = "block";
+                statusBox.innerHTML = "✅ Η αίτηση καταχωρήθηκε\n\n🟡 Η τιμολόγηση ξεκίνησε...\n\nΠαρακαλώ περιμένετε περίπου 2-3 λεπτά.";
+                localStorage.setItem("lastPlate", data.plate);
+                e.target.reset();
+                startCheckingResult();
             } else {
                 alert("Σφάλμα: " + result.message);
             }
@@ -152,7 +105,6 @@ white-space:pre-line;
         }
     });
 
-    // --- ΛΟΓΙΚΗ DROPDOWNS (Δεν άλλαξε) ---
     async function loadDropdown(action, elementId) {
         const select = document.getElementById(elementId);
         try {
@@ -207,143 +159,33 @@ white-space:pre-line;
         document.getElementById("covers").value = selected.join(", ");
     }
 
-async function checkResult(){
+    async function checkResult() {
+        const plate = localStorage.getItem("lastPlate");
+        if(!plate) return;
 
-    const plate = localStorage.getItem("lastPlate");
+        try {
+            const response = await fetch(SCRIPT_URL + "?plate=" + encodeURIComponent(plate));
+            const data = await response.json();
+            const statusBox = document.getElementById("statusBox");
+            statusBox.style.display = "block";
 
-    if(!plate) return;
-
-
-    const box = document.getElementById("resultBox");
-
-    box.style.display="block";
-
-    box.innerHTML="⏳ Έλεγχος τιμολόγησης...";
-
-
-    const response = await fetch(
-        SCRIPT_URL + "?plate=" + encodeURIComponent(plate)
-    );
-
-
-    const data = await response.json();
-
-
-
-    if(data.status === "Προς Τιμολόγηση"){
-
-        box.innerHTML =
-        "🟡 Η τιμολόγηση βρίσκεται σε εξέλιξη...\n\nΠινακίδα: "
-        + plate;
-
-        return;
-
+            if(data.status === "Προς Τιμολόγηση") {
+                statusBox.innerHTML = "🟡 Η τιμολόγηση εκτελείται...\n\nΠινακίδα: " + plate;
+            } else if(data.results) {
+                clearInterval(checkTimer);
+                statusBox.innerHTML = "✅ Η τιμολόγηση ολοκληρώθηκε\n\n" + data.results;
+            }
+        } catch (err) {
+            console.error("Error checking result:", err);
+        }
     }
 
-
-
-    if(data.results){
-
-        box.innerHTML =
-        "✅ Αποτελέσματα για "
-        + plate
-        + "\n\n"
-        + data.results;
-
+    function startCheckingResult() {
+        if (checkTimer) clearInterval(checkTimer);
+        checkTimer = setInterval(checkResult, 10000);
     }
 
-}
-
-
-
-setInterval(checkResult,10000);
-
-    let checkTimer;
-
-
-function startCheckingResult(){
-
-
-    clearInterval(checkTimer);
-
-
-    checkTimer = setInterval(
-        checkResult,
-        10000
-    );
-
-
-}
-
-
-
-async function checkResult(){
-
-
-    const plate =
-    localStorage.getItem("lastPlate");
-
-
-    if(!plate)
-        return;
-
-
-
-    const response =
-    await fetch(
-        SCRIPT_URL +
-        "?plate=" +
-        encodeURIComponent(plate)
-    );
-
-
-
-    const data =
-    await response.json();
-
-
-
-    const statusBox =
-    document.getElementById("statusBox");
-
-
-
-    statusBox.style.display="block";
-
-
-
-    if(data.status === "Προς Τιμολόγηση"){
-
-
-        statusBox.innerHTML =
-        "🟡 Η τιμολόγηση εκτελείται...\n\n" +
-        "Πινακίδα: " +
-        plate;
-
-
-        return;
-
-    }
-
-
-
-    if(data.results){
-
-
-        clearInterval(checkTimer);
-
-
-
-        statusBox.innerHTML =
-        "✅ Η τιμολόγηση ολοκληρώθηκε\n\n" +
-        data.results;
-
-
-    }
-
-
-}
-
+    // Αρχικοποίηση
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
     document.getElementById("package").addEventListener("change", loadCovers);
