@@ -16,13 +16,14 @@
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; }
         
         /* Covers styling */
-        #coversContainer { grid-column: 2; border: 1px solid #ddd; border-radius: 4px; background: #fff; max-height: 200px; overflow-y: auto; }
+        #coversContainer { grid-column: 2; border: 1px solid #ddd; border-radius: 4px; background: #fff; max-height: 200px; overflow-y: auto; padding: 5px; }
         .cover-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .cover-item:hover { background-color: #f1f8ff; }
-        .cover-item input { width: 18px; margin-right: 10px; accent-color: #1976d2; }
+        .cover-item input { width: 18px; height: 18px; margin-right: 10px; cursor: pointer; accent-color: #1976d2; }
 
-        .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .btn-main:hover { background: #1565c0; }
+        .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-main:hover:not(:disabled) { background: #1565c0; }
+        .btn-main:disabled { background: #9e9e9e; cursor: not-allowed; }
         
         @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } label { text-align: left; } }
     </style>
@@ -32,14 +33,13 @@
 <div class="container">
     <h2>Νέα Τιμολόγηση</h2>
     <form id="quoteForm" class="form-grid">
-        
         <label>Αρ.Κυκλοφορίας:</label> <input type="text" id="plate" name="plate" required>
         <label>Διάρκεια:</label> <select id="duration" name="duration"></select>
         <label>Χρήση:</label> <select id="usage" name="usage"></select>
         <label>Εργοστάσιο:</label> <select id="factory" name="factory"></select>
         <label>Μοντέλο:</label> <select id="model" name="model"></select>
         <label>Τ.Κ.:</label> <input type="text" id="zip" name="zip">
-        <label>ΑΦΜ:</label> <input type="text" id="afm" name="afm">
+        <label>ΑΦΜ:</label> <input type="text" id="afm" name="afm" maxlength="9">
         <label>Ημ. Γέννησης:</label> <input type="date" id="dob" name="dob">
         <label>Ημ. Διπλώματος:</label> <input type="date" id="license_date" name="license_date">
         <label>Ημ. 1ης Αδείας:</label> <input type="date" id="first_reg" name="first_reg">
@@ -53,14 +53,55 @@
         <div id="coversContainer">Επιλέξτε πακέτο...</div>
         <input type="hidden" id="covers" name="covers">
 
-        <button type="submit" class="btn-main">Αποθήκευση</button>
+        <button type="submit" id="submitBtn" class="btn-main">Αποθήκευση</button>
     </form>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysguM72PFm-nPnYc2fQOozpFn87Ife1IEhD-WSSlcYk1wJZ6RSvnBXv1SiutWftbJ-/exec";
 
-    // Λειτουργίες φόρτωσης (παραμένουν ίδιες για να μην σπάσει το backend)
+    // --- LOGIC ΓΙΑ DATE FORMAT & AFM PADDING ---
+    function formatData(data) {
+        if (data.afm) data.afm = data.afm.toString().padStart(9, '0');
+        
+        const dateFields = ['dob', 'license_date', 'first_reg', 'acquisition'];
+        dateFields.forEach(field => {
+            if (data[field]) {
+                const [year, month, day] = data[field].split('-');
+                data[field] = `${day}/${month}/${year}`;
+            }
+        });
+        return data;
+    }
+
+    // --- ΔΙΑΧΕΙΡΙΣΗ ΥΠΟΒΟΛΗΣ ---
+    document.getElementById("quoteForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.textContent = "Αποστολή...";
+
+        let data = Object.fromEntries(new FormData(e.target).entries());
+        data = formatData(data);
+
+        try {
+            const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
+            const result = await response.json();
+            
+            if(result.status === "success") {
+                alert("✅ Η αίτηση καταχωρήθηκε!");
+                e.target.reset(); // Καθαρισμός
+            } else {
+                alert("Σφάλμα: " + result.message);
+            }
+        } catch(err) { alert("Σφάλμα σύνδεσης."); }
+        finally {
+            btn.disabled = false;
+            btn.textContent = "Αποθήκευση";
+        }
+    });
+
+    // --- ΛΟΓΙΚΗ DROPDOWNS ---
     async function loadDropdown(action, elementId) {
         const select = document.getElementById(elementId);
         try {
@@ -79,6 +120,7 @@
         const factory = document.getElementById("factory").value;
         const modelSelect = document.getElementById("model");
         if(!factory) return;
+        
         const response = await fetch(`${SCRIPT_URL}?action=models&factory=${encodeURIComponent(factory)}`);
         const models = await response.json();
         modelSelect.innerHTML = '<option value="">-Επιλέξτε-</option>';
@@ -115,16 +157,7 @@
         document.getElementById("covers").value = selected.join(", ");
     }
 
-    document.getElementById("quoteForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
-        try {
-            const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-            const result = await response.json();
-            alert(result.status === "success" ? "✅ Η αίτηση καταχωρήθηκε!" : "Σφάλμα: " + result.message);
-        } catch(err) { alert("Σφάλμα σύνδεσης."); }
-    });
-
+    // Initialization
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
     document.getElementById("package").addEventListener("change", loadCovers);
