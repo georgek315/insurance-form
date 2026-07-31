@@ -51,6 +51,18 @@
         <input type="hidden" id="covers" name="covers">
 
         <button type="submit" id="submitBtn" class="btn-main">Αποθήκευση</button>
+        <div id="statusBox" style="
+display:none;
+margin-top:20px;
+padding:15px;
+border-radius:8px;
+background:#f1f8ff;
+border:1px solid #90caf9;
+font-size:15px;
+line-height:1.6;
+white-space:pre-line;
+">
+</div>
 
         <div id="resultBox" 
 style="
@@ -104,14 +116,30 @@ white-space:pre-line;
             const result = await response.json();
             if(result.status === "success") {
 
-    alert("✅ Η αίτηση καταχωρήθηκε!\n\nΗ τιμολόγηση θα ολοκληρωθεί σε περίπου 2-3 λεπτά.");
+
+    const statusBox = document.getElementById("statusBox");
+
+
+    statusBox.style.display = "block";
+
+
+    statusBox.innerHTML =
+    "✅ Η αίτηση καταχωρήθηκε\n\n" +
+    "🟡 Η τιμολόγηση ξεκίνησε...\n\n" +
+    "Παρακαλώ περιμένετε περίπου 2-3 λεπτά.";
+
 
     localStorage.setItem(
         "lastPlate",
         data.plate
     );
 
+
     e.target.reset();
+
+
+    startCheckingResult();
+
 
 }
             } else {
@@ -230,6 +258,91 @@ async function checkResult(){
 
 setInterval(checkResult,10000);
 
+    let checkTimer;
+
+
+function startCheckingResult(){
+
+
+    clearInterval(checkTimer);
+
+
+    checkTimer = setInterval(
+        checkResult,
+        10000
+    );
+
+
+}
+
+
+
+async function checkResult(){
+
+
+    const plate =
+    localStorage.getItem("lastPlate");
+
+
+    if(!plate)
+        return;
+
+
+
+    const response =
+    await fetch(
+        SCRIPT_URL +
+        "?plate=" +
+        encodeURIComponent(plate)
+    );
+
+
+
+    const data =
+    await response.json();
+
+
+
+    const statusBox =
+    document.getElementById("statusBox");
+
+
+
+    statusBox.style.display="block";
+
+
+
+    if(data.status === "Προς Τιμολόγηση"){
+
+
+        statusBox.innerHTML =
+        "🟡 Η τιμολόγηση εκτελείται...\n\n" +
+        "Πινακίδα: " +
+        plate;
+
+
+        return;
+
+    }
+
+
+
+    if(data.results){
+
+
+        clearInterval(checkTimer);
+
+
+
+        statusBox.innerHTML =
+        "✅ Η τιμολόγηση ολοκληρώθηκε\n\n" +
+        data.results;
+
+
+    }
+
+
+}
 
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
