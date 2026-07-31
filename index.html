@@ -8,13 +8,41 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; line-height: 1.6; }
         .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #1976d2; margin-bottom: 25px; }
-        label { font-weight: 600; display: block; margin-top: 10px; color: #333; }
+        
+        label { font-weight: 600; display: block; margin-top: 15px; color: #333; }
         input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; margin-top: 20px; background: #1976d2; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        
+        button { width: 100%; padding: 15px; margin-top: 25px; background: #1976d2; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
         button:hover { background: #1565c0; }
         button:disabled { background: #ccc; cursor: not-allowed; }
-        #coversContainer { margin-top: 10px; padding: 10px; border: 1px solid #eee; border-radius: 6px; }
-        .cover-item { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; cursor: pointer; }
+
+        /* Styling για το Container των Καλύψεων */
+        #coversContainer { 
+            margin-top: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            background: #fff;
+        }
+        .cover-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 15px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #f0f0f0; 
+            transition: background 0.2s ease;
+            font-size: 15px;
+            color: #444;
+        }
+        .cover-item:last-child { border-bottom: none; }
+        .cover-item:hover { background-color: #f1f8ff; }
+        .cover-item input[type="checkbox"] { 
+            width: 20px; 
+            height: 20px; 
+            margin: 0 15px 0 0; 
+            cursor: pointer;
+            accent-color: #1976d2;
+        }
     </style>
 </head>
 <body>
@@ -23,29 +51,29 @@
     <h2>Νέα Τιμολόγηση</h2>
     <form id="quoteForm">
         <label>Πινακίδα</label>
-        <input type="text" id="plate" required>
+        <input type="text" id="plate" name="plate" required>
 
         <label>Διάρκεια</label>
-        <select id="duration" required><option value="">-Επιλέξτε-</option></select>
+        <select id="duration" name="duration" required><option value="">-Επιλέξτε-</option></select>
 
         <label>Χρήση</label>
-        <select id="usage" required><option value="">-Επιλέξτε-</option></select>
+        <select id="usage" name="usage" required><option value="">-Επιλέξτε-</option></select>
 
         <label>Μάρκα</label>
-        <select id="factory" required><option value="">-Επιλέξτε-</option></select>
+        <select id="factory" name="factory" required><option value="">-Επιλέξτε-</option></select>
 
         <label>Μοντέλο</label>
-        <select id="model" required><option value="">-Επιλέξτε Μάρκα πρώτα-</option></select>
+        <select id="model" name="model" required><option value="">-Επιλέξτε Μάρκα πρώτα-</option></select>
 
         <label>ΑΦΜ</label>
-        <input type="text" id="afm" maxlength="9" pattern="\d{9}" required>
+        <input type="text" id="afm" name="afm" maxlength="9" required>
 
         <label>Πακέτο</label>
-        <select id="package" required><option value="">-Επιλέξτε-</option></select>
+        <select id="package" name="package" required><option value="">-Επιλέξτε-</option></select>
 
         <label>Καλύψεις</label>
         <div id="coversContainer">Επιλέξτε πακέτο για να εμφανιστούν οι καλύψεις</div>
-        <input type="hidden" id="covers">
+        <input type="hidden" id="covers" name="covers">
 
         <button type="submit" id="submitBtn">ΤΙΜΟΛΟΓΗΣΗ</button>
     </form>
@@ -54,6 +82,7 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysguM72PFm-nPnYc2fQOozpFn87Ife1IEhD-WSSlcYk1wJZ6RSvnBXv1SiutWftbJ-/exec";
 
+    // Φόρτωση βασικών dropdowns
     async function loadDropdown(action, elementId) {
         const select = document.getElementById(elementId);
         try {
@@ -68,6 +97,7 @@
         } catch (e) { console.error("Error loading " + action, e); }
     }
 
+    // Φόρτωση μοντέλων βάσει μάρκας
     async function loadModels() {
         const factory = document.getElementById("factory").value;
         const modelSelect = document.getElementById("model");
@@ -81,29 +111,36 @@
             models.forEach(item => {
                 let opt = document.createElement("option");
                 opt.value = item.model;
-                opt.textContent = `${item.model} (${item.engine}cc)`;
+                opt.textContent = `${item.model} (${item.engine}cc / ${item.power}hp)`;
                 modelSelect.appendChild(opt);
             });
         } catch(e) { modelSelect.innerHTML = '<option value="">Σφάλμα φόρτωσης</option>'; }
     }
 
+    // Φόρτωση καλύψεων βάσει πακέτου
     async function loadCovers() {
         const pkg = document.getElementById("package").value;
         const container = document.getElementById("coversContainer");
+        const hiddenCovers = document.getElementById("covers");
+        
+        hiddenCovers.value = "";
         if(!pkg) { container.innerHTML = "Επιλέξτε πακέτο..."; return; }
 
         container.innerHTML = "Φόρτωση καλύψεων...";
-        const response = await fetch(`${SCRIPT_URL}?action=covers&package=${encodeURIComponent(pkg)}`);
-        const covers = await response.json();
-        
-        container.innerHTML = "";
-        covers.forEach(item => {
-            container.insertAdjacentHTML('beforeend', `
-                <label class="cover-item">
-                    <input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> ${item}
-                </label>
-            `);
-        });
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=covers&package=${encodeURIComponent(pkg)}`);
+            const covers = await response.json();
+            
+            container.innerHTML = "";
+            covers.forEach(item => {
+                container.insertAdjacentHTML('beforeend', `
+                    <label class="cover-item">
+                        <input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()">
+                        <span>${item}</span>
+                    </label>
+                `);
+            });
+        } catch(e) { container.innerHTML = "Σφάλμα φόρτωσης."; }
     }
 
     function updateCovers() {
@@ -111,6 +148,7 @@
         document.getElementById("covers").value = selected.join(", ");
     }
 
+    // Αποστολή φόρμας
     document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitBtn");
@@ -123,7 +161,7 @@
         try {
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
-            alert(result.status === "success" ? "✅ Επιτυχία!" : "Σφάλμα: " + result.message);
+            alert(result.status === "success" ? "✅ Η αίτηση καταχωρήθηκε!" : "Σφάλμα: " + result.message);
         } catch(err) { alert("Σφάλμα σύνδεσης."); }
         finally { btn.disabled = false; btn.textContent = "ΤΙΜΟΛΟΓΗΣΗ"; }
     });
