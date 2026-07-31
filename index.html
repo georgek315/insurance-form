@@ -15,6 +15,26 @@
         .cover-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; }
         .btn-main:disabled { background: #9e9e9e; }
+        
+        /* Spinner & Progress Styling */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid #90caf9;
+            border-top: 3px solid #1976d2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
     </style>
 </head>
 <body>
@@ -67,27 +87,55 @@
     document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitBtn");
+        const statusBox = document.getElementById("statusBox");
+        
         let data = Object.fromEntries(new FormData(e.target).entries());
         data = formatData(data);
         
         btn.disabled = true;
         btn.textContent = "Αποστολή...";
 
+        statusBox.style.display = "block";
+        statusBox.style.background = "#f1f8ff";
+        statusBox.style.borderColor = "#90caf9";
+        statusBox.innerHTML = `
+            <div class="status-container">
+                <div class="spinner"></div>
+                <div><strong>⏳ Καταχώρηση αίτησης...</strong></div>
+            </div>
+        `;
+
         try {
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
+            
             if(result.status === "success") {
-                document.getElementById("statusBox").style.display = "block";
-                document.getElementById("statusBox").innerHTML = "✅ Η αίτηση καταχωρήθηκε.\n\n🟡 Η τιμολόγηση ξεκίνησε...";
+                statusBox.innerHTML = `
+                    <div class="status-container">
+                        <div class="spinner"></div>
+                        <div><strong>🚀 Η αίτηση καταχωρήθηκε!</strong><br><small>Αναμονή για εκκίνηση του Bot...</small></div>
+                    </div>
+                `;
                 localStorage.setItem("lastPlate", data.plate);
                 e.target.reset();
+                
                 if(checkTimer) clearInterval(checkTimer);
-                checkTimer = setInterval(checkResult, 10000);
+                checkTimer = setInterval(checkResult, 5000);
             } else {
-                alert("Σφάλμα: " + result.message);
+                statusBox.style.background = "#ffebee";
+                statusBox.style.borderColor = "#e57373";
+                statusBox.innerHTML = "❌ Σφάλμα: " + result.message;
             }
-        } catch(err) { console.error(err); alert("Σφάλμα σύνδεσης."); }
-        finally { btn.disabled = false; btn.textContent = "Αποθήκευση"; }
+        } catch(err) { 
+            console.error(err); 
+            statusBox.style.background = "#ffebee";
+            statusBox.style.borderColor = "#e57373";
+            statusBox.innerHTML = "❌ Σφάλμα σύνδεσης με τον διακομιστή."; 
+        }
+        finally { 
+            btn.disabled = false; 
+            btn.textContent = "Αποθήκευση"; 
+        }
     });
 
     // --- DROPDOWNS ---
@@ -141,21 +189,50 @@
         document.getElementById("covers").value = selected.join(", ");
     }
 
-    // --- CHECK RESULT ---
+    // --- CHECK RESULT (LIVE PROGRESS UPDATES) ---
     async function checkResult() {
         const plate = localStorage.getItem("lastPlate");
         if(!plate) return;
+        
         try {
-            const response = await fetch(SCRIPT_URL + "?plate=" + encodeURIComponent(plate));
+            const response = await fetch(`${SCRIPT_URL}?plate=${encodeURIComponent(plate)}`);
             const data = await response.json();
             const box = document.getElementById("statusBox");
-            if(data.status === "Προς Τιμολόγηση") {
-                box.innerHTML = "🟡 Η τιμολόγηση εκτελείται για: " + plate;
-            } else if(data.results) {
+            
+            box.style.display = "block";
+
+            // 1. Ολοκληρώθηκε
+            if(data.status === "Ολοκληρώθηκε" || (data.results && data.results.length > 0)) {
                 clearInterval(checkTimer);
-                box.innerHTML = "✅ Η τιμολόγηση ολοκληρώθηκε\n\n" + data.results;
+                box.style.background = "#e8f5e9";
+                box.style.borderColor = "#81c784";
+                box.innerHTML = "<strong>✅ Η τιμολόγηση ολοκληρώθηκε!</strong><br><br>" + (data.results || "");
+            } 
+            // 2. Σφάλμα
+            else if(data.status && data.status.startsWith("Σφάλμα")) {
+                clearInterval(checkTimer);
+                box.style.background = "#ffebee";
+                box.style.borderColor = "#e57373";
+                box.innerHTML = "<strong>❌ Προέκυψε πρόβλημα:</strong><br>" + data.status;
+            } 
+            // 3. Ενδιάμεσα Βήματα
+            else if(data.status) {
+                box.style.background = "#f1f8ff";
+                box.style.borderColor = "#90caf9";
+                box.innerHTML = `
+                    <div class="status-container">
+                        <div class="spinner"></div>
+                        <div>
+                            <strong>Επεξεργασία σε εξέλιξη...</strong><br>
+                            <span>${data.status}</span>
+                            <br><small style="color:#666;">(Πινακίδα: ${plate})</small>
+                        </div>
+                    </div>
+                `;
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error("Error checking status:", err); 
+        }
     }
 
     // --- INIT ---
