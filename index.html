@@ -1,179 +1,137 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Νέα Τιμολόγηση</title>
-<style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-    .container { max-width: 550px; margin: auto; background: white; padding: 25px; border-radius: 10px; }
-    h2 { text-align: center; }
-    input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; box-sizing: border-box; }
-    textarea { height: 80px; }
-    label { font-weight: bold; }
-    button { width: 100%; padding: 15px; background: #1976d2; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
-    button:hover { background: #125aa0; }
-    #coversContainer label { font-weight: normal; display: block; margin-bottom: 8px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Νέα Τιμολόγηση</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; line-height: 1.6; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1976d2; margin-bottom: 25px; }
+        label { font-weight: 600; display: block; margin-top: 10px; color: #333; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 20px; background: #1976d2; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #1565c0; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #coversContainer { margin-top: 10px; padding: 10px; border: 1px solid #eee; border-radius: 6px; }
+        .cover-item { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Νέα Τιμολόγηση</h2>
+    <form id="quoteForm">
+        <label>Πινακίδα</label>
+        <input type="text" id="plate" required>
 
-    <label>Πινακίδα</label>
-    <input id="plate">
+        <label>Διάρκεια</label>
+        <select id="duration" required><option value="">-Επιλέξτε-</option></select>
 
-    <label>Διάρκεια</label>
-    <select id="duration"><option value="">-Επιλέξατε-</option></select>
+        <label>Χρήση</label>
+        <select id="usage" required><option value="">-Επιλέξτε-</option></select>
 
-    <label>Χρήση</label>
-    <select id="usage"><option value="">-Επιλέξατε-</option></select>
+        <label>Μάρκα</label>
+        <select id="factory" required><option value="">-Επιλέξτε-</option></select>
 
-    <label>Μάρκα</label>
-    <select id="factory"><option value="">-Επιλέξατε-</option></select>
+        <label>Μοντέλο</label>
+        <select id="model" required><option value="">-Επιλέξτε Μάρκα πρώτα-</option></select>
 
-    <label>Μοντέλο</label>
-    <select id="model"><option value="">-Επιλέξατε-</option></select>
+        <label>ΑΦΜ</label>
+        <input type="text" id="afm" maxlength="9" pattern="\d{9}" required>
 
-    <label>ΤΚ</label>
-    <input id="zip">
+        <label>Πακέτο</label>
+        <select id="package" required><option value="">-Επιλέξτε-</option></select>
 
-    <label>ΑΦΜ</label>
-    <input id="afm">
+        <label>Καλύψεις</label>
+        <div id="coversContainer">Επιλέξτε πακέτο για να εμφανιστούν οι καλύψεις</div>
+        <input type="hidden" id="covers">
 
-    <label>Ημερομηνία γέννησης</label>
-    <input id="dob" placeholder="πχ 01/01/1980">
-
-    <label>Ημερομηνία διπλώματος</label>
-    <input id="license_date">
-
-    <label>Πρώτη κυκλοφορία</label>
-    <input id="first_reg">
-
-    <label>Ημερομηνία αγοράς</label>
-    <input id="acquisition">
-
-    <label>Κυβικά / THP</label>
-    <input id="thp">
-
-    <label>KW</label>
-    <input id="kw">
-
-    <label>Αξία οχήματος</label>
-    <input id="value">
-
-    <label>Πακέτο</label>
-    <select id="package"><option value="">-Επιλέξατε-</option></select>
-
-    <label>Καλύψεις</label>
-    <div id="coversContainer"></div>
-    <input type="hidden" id="covers">
-
-    <button onclick="sendData()">ΤΙΜΟΛΟΓΗΣΗ</button>
+        <button type="submit" id="submitBtn">ΤΙΜΟΛΟΓΗΣΗ</button>
+    </form>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLWlk6-KY1ktXAaoLEcA1IDQZS7aIEGXVdSCNXEYd1tSxYzhNSF6M-IQ634CjZPHa-/exec";
 
     async function loadDropdown(action, elementId) {
-    const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=" + action);
-    const data = await response.json();
-    
-    const select = document.getElementById(elementId);
-    
-    // DEBUG: Εδώ θα δούμε αν όντως βρίσκει το select
-    if (!select) {
-        console.error("ΠΡΟΣΟΧΗ: Δεν βρέθηκε dropdown με ID: " + elementId);
-        return;
+        const select = document.getElementById(elementId);
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=${action}`);
+            const data = await response.json();
+            select.innerHTML = '<option value="">-Επιλέξτε-</option>';
+            data.forEach(item => {
+                let opt = document.createElement("option");
+                opt.value = item; opt.textContent = item;
+                select.appendChild(opt);
+            });
+        } catch (e) { console.error("Error loading " + action, e); }
     }
-
-    data.forEach(function(item) {
-        let option = document.createElement("option");
-        option.value = item;
-        option.textContent = item;
-        select.appendChild(option);
-    });
-    
-    console.log("Επιτυχία: Προστέθηκαν " + data.length + " επιλογές στο " + elementId);
-}
 
     async function loadModels() {
         const factory = document.getElementById("factory").value;
         const modelSelect = document.getElementById("model");
-        modelSelect.innerHTML = '<option value="">-Επιλέξατε-</option>';
         if(!factory) return;
 
-        const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=models&factory=" + encodeURIComponent(factory));
-        const models = await response.json();
-        models.forEach(function(item) {
-            let option = document.createElement("option");
-            option.value = item.model;
-            option.textContent = item.model + " " + item.version + " (" + item.engine + "cc / " + item.power + "hp)";
-            modelSelect.appendChild(option);
-        });
+        modelSelect.innerHTML = '<option>Φόρτωση...</option>';
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=models&factory=${encodeURIComponent(factory)}`);
+            const models = await response.json();
+            modelSelect.innerHTML = '<option value="">-Επιλέξτε-</option>';
+            models.forEach(item => {
+                let opt = document.createElement("option");
+                opt.value = item.model;
+                opt.textContent = `${item.model} (${item.engine}cc)`;
+                modelSelect.appendChild(opt);
+            });
+        } catch(e) { modelSelect.innerHTML = '<option value="">Σφάλμα φόρτωσης</option>'; }
     }
 
     async function loadCovers() {
-        const packageName = document.getElementById("package").value;
+        const pkg = document.getElementById("package").value;
         const container = document.getElementById("coversContainer");
-        const hidden = document.getElementById("covers");
-        container.innerHTML = "";
-        hidden.value = "";
-        if(!packageName) return;
+        if(!pkg) { container.innerHTML = "Επιλέξτε πακέτο..."; return; }
 
-        const response = await fetch(SCRIPT_URL + "?v=" + Date.now() + "&action=covers&package=" + encodeURIComponent(packageName));
+        container.innerHTML = "Φόρτωση καλύψεων...";
+        const response = await fetch(`${SCRIPT_URL}?action=covers&package=${encodeURIComponent(pkg)}`);
         const covers = await response.json();
-        covers.forEach(function(item) {
-            let div = document.createElement("div");
-            div.innerHTML = `<label><input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> ${item}</label>`;
-            container.appendChild(div);
+        
+        container.innerHTML = "";
+        covers.forEach(item => {
+            container.insertAdjacentHTML('beforeend', `
+                <label class="cover-item">
+                    <input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> ${item}
+                </label>
+            `);
         });
     }
 
     function updateCovers() {
-        let selected = [];
-        document.querySelectorAll(".coverCheck:checked").forEach(function(item) { selected.push(item.value); });
+        const selected = Array.from(document.querySelectorAll(".coverCheck:checked")).map(i => i.value);
         document.getElementById("covers").value = selected.join(", ");
     }
 
-    // Αρχική φόρτωση
-    loadDropdown("factory", "factory");
-    loadDropdown("usage", "usage");
-    loadDropdown("duration", "duration");
-    loadDropdown("package", "package");
+    document.getElementById("quoteForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.textContent = "Αποστολή...";
 
-    // Events
-    document.getElementById("factory").addEventListener("change", loadModels);
-    document.getElementById("package").addEventListener("change", loadCovers);
-
-    async function sendData() {
-        const data = {
-            plate: document.getElementById("plate").value,
-            duration: document.getElementById("duration").value,
-            usage: document.getElementById("usage").value,
-            factory: document.getElementById("factory").value,
-            model: document.getElementById("model").value,
-            zip: document.getElementById("zip").value,
-            afm: document.getElementById("afm").value,
-            dob: document.getElementById("dob").value,
-            license_date: document.getElementById("license_date").value,
-            first_reg: document.getElementById("first_reg").value,
-            acquisition: document.getElementById("acquisition").value,
-            thp: document.getElementById("thp").value,
-            kw: document.getElementById("kw").value,
-            value: document.getElementById("value").value,
-            package: document.getElementById("package").value,
-            covers: document.getElementById("covers").value
-        };
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
 
         try {
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
-            if(result.status === "success") { alert("✅ Η αίτηση καταχωρήθηκε και πήγε για τιμολόγηση"); }
-            else { alert("Σφάλμα: " + result.message); }
-        } catch(error) { alert("Σφάλμα σύνδεσης: " + error); }
-    }
+            alert(result.status === "success" ? "✅ Επιτυχία!" : "Σφάλμα: " + result.message);
+        } catch(err) { alert("Σφάλμα σύνδεσης."); }
+        finally { btn.disabled = false; btn.textContent = "ΤΙΜΟΛΟΓΗΣΗ"; }
+    });
+
+    // Initialization
+    ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
+    document.getElementById("factory").addEventListener("change", loadModels);
+    document.getElementById("package").addEventListener("change", loadCovers);
 </script>
 </body>
 </html>
