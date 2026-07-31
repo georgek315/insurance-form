@@ -8,21 +8,13 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fa; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         h2 { text-align: center; color: #1976d2; margin-bottom: 30px; }
-
         .form-grid { display: grid; grid-template-columns: 160px 1fr; gap: 15px; align-items: center; }
         label { font-weight: 600; color: #444; text-align: right; font-size: 0.9em; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; }
-        
         #coversContainer { grid-column: 2; border: 1px solid #ddd; border-radius: 4px; background: #fff; max-height: 200px; overflow-y: auto; padding: 5px; }
         .cover-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        .cover-item:hover { background-color: #f1f8ff; }
-        .cover-item input { width: 18px; height: 18px; margin-right: 10px; cursor: pointer; accent-color: #1976d2; }
-
-        .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn-main:hover:not(:disabled) { background: #1565c0; }
-        .btn-main:disabled { background: #9e9e9e; cursor: not-allowed; }
-        
-        @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } label { text-align: left; } }
+        .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .btn-main:disabled { background: #9e9e9e; }
     </style>
 </head>
 <body>
@@ -51,9 +43,7 @@
         <input type="hidden" id="covers" name="covers">
 
         <button type="submit" id="submitBtn" class="btn-main">Αποθήκευση</button>
-        
-        <div id="statusBox" style="display:none; margin-top:20px; padding:15px; border-radius:8px; background:#f1f8ff; border:1px solid #90caf9; font-size:15px; line-height:1.6; white-space:pre-line;"></div>
-        <div id="resultBox" style="margin-top:20px; padding:15px; border-radius:8px; background:#f1f8ff; display:none; white-space:pre-line;"></div>
+        <div id="statusBox" style="display:none; margin-top:20px; padding:15px; border-radius:8px; background:#f1f8ff; border:1px solid #90caf9;"></div>
     </form>
 </div>
 
@@ -61,21 +51,19 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSQrlsy4053DBrOz0r8yy16WUtRwH2LRxjiwkGv3_eoLEN45Al945SU_Sj-wBxRHIb/exec";
     let checkTimer = null;
 
+    // --- ΒΟΗΘΗΤΙΚΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ---
     function formatData(data) {
-        if (data.afm) {
-            let strAfm = String(data.afm).trim();
-            data.afm = strAfm.padStart(9, '0');
-        }
-        const dateFields = ['dob', 'license_date', 'first_reg', 'acquisition'];
-        dateFields.forEach(field => {
+        if (data.afm) data.afm = String(data.afm).trim().padStart(9, '0');
+        ['dob', 'license_date', 'first_reg', 'acquisition'].forEach(field => {
             if (data[field]) {
-                const [year, month, day] = data[field].split('-');
-                data[field] = `${day}/${month}/${year}`;
+                const [y, m, d] = data[field].split('-');
+                data[field] = `${d}/${m}/${y}`;
             }
         });
         return data;
     }
 
+    // --- SUBMIT ΦΟΡΜΑΣ ---
     document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitBtn");
@@ -89,27 +77,25 @@
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
             if(result.status === "success") {
-                const statusBox = document.getElementById("statusBox");
-                statusBox.style.display = "block";
-                statusBox.innerHTML = "✅ Η αίτηση καταχωρήθηκε\n\n🟡 Η τιμολόγηση ξεκίνησε...\n\nΠαρακαλώ περιμένετε περίπου 2-3 λεπτά.";
+                document.getElementById("statusBox").style.display = "block";
+                document.getElementById("statusBox").innerHTML = "✅ Η αίτηση καταχωρήθηκε.\n\n🟡 Η τιμολόγηση ξεκίνησε...";
                 localStorage.setItem("lastPlate", data.plate);
                 e.target.reset();
-                startCheckingResult();
+                if(checkTimer) clearInterval(checkTimer);
+                checkTimer = setInterval(checkResult, 10000);
             } else {
                 alert("Σφάλμα: " + result.message);
             }
-        } catch(err) { alert("Σφάλμα σύνδεσης."); }
-        finally {
-            btn.disabled = false;
-            btn.textContent = "Αποθήκευση";
-        }
+        } catch(err) { console.error(err); alert("Σφάλμα σύνδεσης."); }
+        finally { btn.disabled = false; btn.textContent = "Αποθήκευση"; }
     });
 
+    // --- DROPDOWNS ---
     async function loadDropdown(action, elementId) {
-        const select = document.getElementById(elementId);
         try {
             const response = await fetch(`${SCRIPT_URL}?action=${action}`);
             const data = await response.json();
+            const select = document.getElementById(elementId);
             select.innerHTML = '<option value="">-Επιλέξτε-</option>';
             data.forEach(item => {
                 let opt = document.createElement("option");
@@ -123,35 +109,31 @@
         const factory = document.getElementById("factory").value;
         const modelSelect = document.getElementById("model");
         if(!factory) return;
-        const response = await fetch(`${SCRIPT_URL}?action=models&factory=${encodeURIComponent(factory)}`);
-        const models = await response.json();
-        modelSelect.innerHTML = '<option value="">-Επιλέξτε-</option>';
-        models.forEach(item => {
-            let opt = document.createElement("option");
-            opt.value = item.model;
-            opt.textContent = `${item.model} (${item.engine}cc / ${item.power}hp)`;
-            modelSelect.appendChild(opt);
-        });
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=models&factory=${encodeURIComponent(factory)}`);
+            const models = await response.json();
+            modelSelect.innerHTML = '<option value="">-Επιλέξτε-</option>';
+            models.forEach(item => {
+                let opt = document.createElement("option");
+                opt.value = item.model;
+                opt.textContent = `${item.model} (${item.engine}cc / ${item.power}hp)`;
+                modelSelect.appendChild(opt);
+            });
+        } catch(e) { console.error(e); }
     }
 
     async function loadCovers() {
         const pkg = document.getElementById("package").value;
         const container = document.getElementById("coversContainer");
-        const hiddenCovers = document.getElementById("covers");
-        hiddenCovers.value = "";
-        if(!pkg) { container.innerHTML = '<div class="cover-item">Επιλέξτε πακέτο...</div>'; return; }
-        
-        const response = await fetch(`${SCRIPT_URL}?action=covers&package=${encodeURIComponent(pkg)}`);
-        const covers = await response.json();
-        container.innerHTML = "";
-        covers.forEach(item => {
-            container.insertAdjacentHTML('beforeend', `
-                <label class="cover-item">
-                    <input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()">
-                    <span>${item}</span>
-                </label>
-            `);
-        });
+        if(!pkg) { container.innerHTML = 'Επιλέξτε πακέτο...'; return; }
+        try {
+            const response = await fetch(`${SCRIPT_URL}?action=covers&package=${encodeURIComponent(pkg)}`);
+            const covers = await response.json();
+            container.innerHTML = "";
+            covers.forEach(item => {
+                container.insertAdjacentHTML('beforeend', `<label class="cover-item"><input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> <span>${item}</span></label>`);
+            });
+        } catch(e) { console.error(e); }
     }
 
     function updateCovers() {
@@ -159,33 +141,24 @@
         document.getElementById("covers").value = selected.join(", ");
     }
 
+    // --- CHECK RESULT ---
     async function checkResult() {
         const plate = localStorage.getItem("lastPlate");
         if(!plate) return;
-
         try {
             const response = await fetch(SCRIPT_URL + "?plate=" + encodeURIComponent(plate));
             const data = await response.json();
-            const statusBox = document.getElementById("statusBox");
-            statusBox.style.display = "block";
-
+            const box = document.getElementById("statusBox");
             if(data.status === "Προς Τιμολόγηση") {
-                statusBox.innerHTML = "🟡 Η τιμολόγηση εκτελείται...\n\nΠινακίδα: " + plate;
+                box.innerHTML = "🟡 Η τιμολόγηση εκτελείται για: " + plate;
             } else if(data.results) {
                 clearInterval(checkTimer);
-                statusBox.innerHTML = "✅ Η τιμολόγηση ολοκληρώθηκε\n\n" + data.results;
+                box.innerHTML = "✅ Η τιμολόγηση ολοκληρώθηκε\n\n" + data.results;
             }
-        } catch (err) {
-            console.error("Error checking result:", err);
-        }
+        } catch (err) { console.error(err); }
     }
 
-    function startCheckingResult() {
-        if (checkTimer) clearInterval(checkTimer);
-        checkTimer = setInterval(checkResult, 10000);
-    }
-
-    // Αρχικοποίηση
+    // --- INIT ---
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
     document.getElementById("package").addEventListener("change", loadCovers);
