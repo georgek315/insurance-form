@@ -51,6 +51,17 @@
         <input type="hidden" id="covers" name="covers">
 
         <button type="submit" id="submitBtn" class="btn-main">Αποθήκευση</button>
+
+        <div id="resultBox" 
+style="
+margin-top:20px;
+padding:15px;
+border-radius:8px;
+background:#f1f8ff;
+display:none;
+white-space:pre-line;
+">
+</div>
     </form>
 </div>
 
@@ -92,8 +103,17 @@
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
             if(result.status === "success") {
-                alert("✅ Η αίτηση καταχωρήθηκε!");
-                e.target.reset();
+
+    alert("✅ Η αίτηση καταχωρήθηκε!\n\nΗ τιμολόγηση θα ολοκληρωθεί σε περίπου 2-3 λεπτά.");
+
+    localStorage.setItem(
+        "lastPlate",
+        data.plate
+    );
+
+    e.target.reset();
+
+}
             } else {
                 alert("Σφάλμα: " + result.message);
             }
@@ -158,6 +178,58 @@
         const selected = Array.from(document.querySelectorAll(".coverCheck:checked")).map(i => i.value);
         document.getElementById("covers").value = selected.join(", ");
     }
+
+async function checkResult(){
+
+    const plate = localStorage.getItem("lastPlate");
+
+    if(!plate) return;
+
+
+    const box = document.getElementById("resultBox");
+
+    box.style.display="block";
+
+    box.innerHTML="⏳ Έλεγχος τιμολόγησης...";
+
+
+    const response = await fetch(
+        SCRIPT_URL + "?plate=" + encodeURIComponent(plate)
+    );
+
+
+    const data = await response.json();
+
+
+
+    if(data.status === "Προς Τιμολόγηση"){
+
+        box.innerHTML =
+        "🟡 Η τιμολόγηση βρίσκεται σε εξέλιξη...\n\nΠινακίδα: "
+        + plate;
+
+        return;
+
+    }
+
+
+
+    if(data.results){
+
+        box.innerHTML =
+        "✅ Αποτελέσματα για "
+        + plate
+        + "\n\n"
+        + data.results;
+
+    }
+
+}
+
+
+
+setInterval(checkResult,10000);
+
 
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
