@@ -5,44 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Νέα Τιμολόγηση</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fa; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-        h2 { text-align: center; color: #1976d2; margin-bottom: 30px; }
-        .form-grid { display: grid; grid-template-columns: 160px 1fr; gap: 15px; align-items: center; }
-        label { font-weight: 600; color: #444; text-align: right; font-size: 0.9em; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff; }
-        #coversContainer { grid-column: 2; border: 1px solid #ddd; border-radius: 4px; background: #fff; max-height: 200px; overflow-y: auto; padding: 5px; }
-        .cover-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .btn-main:disabled { background: #9e9e9e; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 650px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
+        h2 { text-align: center; color: #1976d2; margin-bottom: 25px; font-weight: 700; }
         
-        /* Spinner & Progress Styling */
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 3px solid #90caf9;
-            border-top: 3px solid #1976d2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: inline-block;
+        /* Form Layout */
+        .form-grid { display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: center; }
+        label { font-weight: 600; color: #555; text-align: right; font-size: 0.9em; }
+        input[type="text"], input[type="number"], input[type="date"], select { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
+        input:focus, select:focus { border-color: #1976d2; outline: none; }
+        
+        /* 1. Νέο Design για τις Καλύψεις (Checkboxes) */
+        #coversContainer { grid-column: 2; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; max-height: 180px; overflow-y: auto; padding: 6px; }
+        .cover-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 8px 12px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #eee; 
+            font-size: 14px; 
+            font-weight: 500;
+            color: #333;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .cover-item:last-child { border-bottom: none; }
+        .cover-item:hover { background: #eef5fc; }
+        .cover-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #1976d2; }
+
+        .btn-main { grid-column: span 2; background: #1976d2; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 15px; transition: background 0.2s; }
+        .btn-main:hover { background: #1565c0; }
+        .btn-main:disabled { background: #9e9e9e; }
+
+        /* 2. Σελίδα Αποτελεσμάτων & Progress View */
+        #resultsPage { display: none; max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
+        
+        .progress-box { background: #f0f7ff; border: 1px solid #b3d7ff; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px; }
+        .spinner { width: 30px; height: 30px; border: 4px solid #b3d7ff; border-top: 4px solid #1976d2; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Οριζόντια Layout για Κάρτες Αποτελεσμάτων */
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 15px; margin-top: 20px; }
+        .price-card { 
+            background: #fff; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 8px; 
+            padding: 15px; 
+            text-align: center; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .status-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .price-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .price-card .company { font-weight: 700; color: #444; font-size: 15px; margin-bottom: 8px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .price-card .amount { font-size: 22px; font-weight: bold; color: #2e7d32; }
+        .price-card .no-result { font-size: 13px; color: #888; font-style: italic; }
+
+        .btn-back { background: #666; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- ΦΟΡΜΑ ΕΙΣΑΓΩΓΗΣ (ΣΕΛΙΔΑ 1) -->
+<div class="container" id="formPage">
     <h2>Νέα Τιμολόγηση</h2>
     <form id="quoteForm" class="form-grid">
-        <label>Αρ.Κυκλοφορίας:</label> <input type="text" id="plate" name="plate" required>
+        <label>Αρ.Κυκλοφορίας:</label> <input type="text" id="plate" name="plate" required placeholder="π.χ. ΙΧΗ1234">
         <label>Διάρκεια:</label> <select id="duration" name="duration"></select>
         <label>Χρήση:</label> <select id="usage" name="usage"></select>
         <label>Εργοστάσιο:</label> <select id="factory" name="factory"></select>
@@ -62,16 +91,28 @@
         <div id="coversContainer">Επιλέξτε πακέτο...</div>
         <input type="hidden" id="covers" name="covers">
 
-        <button type="submit" id="submitBtn" class="btn-main">Αποθήκευση</button>
-        <div id="statusBox" style="display:none; margin-top:20px; padding:15px; border-radius:8px; background:#f1f8ff; border:1px solid #90caf9;"></div>
+        <button type="submit" id="submitBtn" class="btn-main">Υποβολή &amp; Τιμολόγηση</button>
     </form>
+</div>
+
+<!-- ΣΕΛΙΔΑ ΑΠΟΤΕΛΕΣΜΑΤΩΝ & LIVE PROGRESS (ΣΕΛΙΔΑ 2) -->
+<div id="resultsPage">
+    <button class="btn-back" onclick="goBack()">← Νέα Αίτηση</button>
+    <h2 id="resultsTitle">Επεξεργασία Αίτησης</h2>
+    
+    <div id="progressBox" class="progress-box">
+        <div class="spinner"></div>
+        <div id="statusText" style="font-weight: 600; font-size: 16px;">Αποστολή στοιχείων...</div>
+        <div id="plateSubText" style="color:#666; font-size: 13px; margin-top:5px;"></div>
+    </div>
+
+    <div id="resultsContainer"></div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSQrlsy4053DBrOz0r8yy16WUtRwH2LRxjiwkGv3_eoLEN45Al945SU_Sj-wBxRHIb/exec";
     let checkTimer = null;
 
-    // --- ΒΟΗΘΗΤΙΚΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ---
     function formatData(data) {
         if (data.afm) data.afm = String(data.afm).trim().padStart(9, '0');
         ['dob', 'license_date', 'first_reg', 'acquisition'].forEach(field => {
@@ -83,62 +124,117 @@
         return data;
     }
 
-    // --- SUBMIT ΦΟΡΜΑΣ ---
+    // SUBMIT FORM -> METABAΣΗ ΣΤΗ ΝΕΑ ΣΕΛΙΔΑ
     document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = document.getElementById("submitBtn");
-        const statusBox = document.getElementById("statusBox");
-        
         let data = Object.fromEntries(new FormData(e.target).entries());
         data = formatData(data);
         
         btn.disabled = true;
-        btn.textContent = "Αποστολή...";
 
-        statusBox.style.display = "block";
-        statusBox.style.background = "#f1f8ff";
-        statusBox.style.borderColor = "#90caf9";
-        statusBox.innerHTML = `
-            <div class="status-container">
-                <div class="spinner"></div>
-                <div><strong>⏳ Καταχώρηση αίτησης...</strong></div>
-            </div>
-        `;
+        // Μετάβαση στο Results Page
+        document.getElementById("formPage").style.display = "none";
+        document.getElementById("resultsPage").style.display = "block";
+        document.getElementById("progressBox").style.display = "block";
+        document.getElementById("resultsContainer").innerHTML = "";
+        document.getElementById("statusText").innerText = "⏳ Καταχώρηση αίτησης στο σύστημα...";
+        document.getElementById("plateSubText").innerText = "Πινακίδα: " + data.plate;
 
         try {
             const response = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
             const result = await response.json();
             
             if(result.status === "success") {
-                statusBox.innerHTML = `
-                    <div class="status-container">
-                        <div class="spinner"></div>
-                        <div><strong>🚀 Η αίτηση καταχωρήθηκε!</strong><br><small>Αναμονή για εκκίνηση του Bot...</small></div>
-                    </div>
-                `;
                 localStorage.setItem("lastPlate", data.plate);
                 e.target.reset();
                 
+                // Έναρξη Polling
                 if(checkTimer) clearInterval(checkTimer);
-                checkTimer = setInterval(checkResult, 5000);
+                checkTimer = setInterval(checkResult, 4000);
             } else {
-                statusBox.style.background = "#ffebee";
-                statusBox.style.borderColor = "#e57373";
-                statusBox.innerHTML = "❌ Σφάλμα: " + result.message;
+                showError("Σφάλμα: " + result.message);
             }
         } catch(err) { 
-            console.error(err); 
-            statusBox.style.background = "#ffebee";
-            statusBox.style.borderColor = "#e57373";
-            statusBox.innerHTML = "❌ Σφάλμα σύνδεσης με τον διακομιστή."; 
+            showError("Σφάλμα σύνδεσης με τον διακομιστή."); 
         }
         finally { 
             btn.disabled = false; 
-            btn.textContent = "Αποθήκευση"; 
         }
     });
 
-    // --- DROPDOWNS ---
+    // CHECK RESULT & RENDER CARDS (ΟΡΙΖΟΝΤΙΑ)
+    async function checkResult() {
+        const plate = localStorage.getItem("lastPlate");
+        if(!plate) return;
+        
+        try {
+            const response = await fetch(`${SCRIPT_URL}?plate=${encodeURIComponent(plate)}`);
+            const data = await response.json();
+            
+            // 1. Αν Ολοκληρώθηκε
+            if(data.status === "Ολοκληρώθηκε" || (data.results && data.results.length > 0)) {
+                clearInterval(checkTimer);
+                document.getElementById("progressBox").style.display = "none";
+                document.getElementById("resultsTitle").innerText = "✅ Αποτελέσματα Τιμολόγησης";
+                
+                renderResultsCards(data.results);
+            } 
+            // 2. Αν Σφάλμα
+            else if(data.status && data.status.startsWith("Σφάλμα")) {
+                clearInterval(checkTimer);
+                showError(data.status);
+            } 
+            // 3. Live Progress Update
+            else if(data.status) {
+                document.getElementById("statusText").innerText = data.status;
+            }
+        } catch (err) { 
+            console.error(err); 
+        }
+    }
+
+    // Μετατροπή του string "ΕΘΝΙΚΗ: 128.67 | ΑΤΛΑΝΤΙΚΗ: 131.50" σε Οριζόντιες Κάρτες
+    function renderResultsCards(rawResults) {
+        const container = document.getElementById("resultsContainer");
+        if (!rawResults) return;
+
+        // Χωρισμός ανά pipe (|)
+        const items = rawResults.split('|').map(s => s.trim()).filter(s => s.length > 0);
+        
+        let html = '<div class="results-grid">';
+        items.forEach(item => {
+            const parts = item.split(':');
+            const company = parts[0] ? parts[0].trim() : "Εταιρεία";
+            const price = parts[1] ? parts[1].trim() : "";
+
+            const isNumeric = !isNaN(parseFloat(price));
+
+            html += `
+                <div class="price-card">
+                    <span class="company">${company}</span>
+                    ${isNumeric ? `<span class="amount">${price} €</span>` : `<span class="no-result">${price || 'Χωρίς αποτέλεσμα'}</span>`}
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        container.innerHTML = html;
+    }
+
+    function showError(msg) {
+        document.getElementById("progressBox").style.background = "#ffebee";
+        document.getElementById("progressBox").style.borderColor = "#e57373";
+        document.getElementById("progressBox").innerHTML = `<strong>❌ Πρόβλημα:</strong><br>${msg}`;
+    }
+
+    function goBack() {
+        if(checkTimer) clearInterval(checkTimer);
+        document.getElementById("resultsPage").style.display = "none";
+        document.getElementById("formPage").style.display = "block";
+    }
+
+    // --- DROPDOWNS & COVERS ---
     async function loadDropdown(action, elementId) {
         try {
             const response = await fetch(`${SCRIPT_URL}?action=${action}`);
@@ -150,7 +246,7 @@
                 opt.value = item; opt.textContent = item;
                 select.appendChild(opt);
             });
-        } catch (e) { console.error("Error loading " + action, e); }
+        } catch (e) { console.error(e); }
     }
 
     async function loadModels() {
@@ -173,13 +269,18 @@
     async function loadCovers() {
         const pkg = document.getElementById("package").value;
         const container = document.getElementById("coversContainer");
-        if(!pkg) { container.innerHTML = 'Επιλέξτε πακέτο...'; return; }
+        if(!pkg) { container.innerHTML = '<span style="color:#888; font-size:13px; padding:5px;">Επιλέξτε πακέτο...</span>'; return; }
         try {
             const response = await fetch(`${SCRIPT_URL}?action=covers&package=${encodeURIComponent(pkg)}`);
             const covers = await response.json();
             container.innerHTML = "";
             covers.forEach(item => {
-                container.insertAdjacentHTML('beforeend', `<label class="cover-item"><input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> <span>${item}</span></label>`);
+                container.insertAdjacentHTML('beforeend', `
+                    <label class="cover-item">
+                        <input type="checkbox" class="coverCheck" value="${item}" onchange="updateCovers()"> 
+                        <span>${item}</span>
+                    </label>
+                `);
             });
         } catch(e) { console.error(e); }
     }
@@ -189,53 +290,7 @@
         document.getElementById("covers").value = selected.join(", ");
     }
 
-    // --- CHECK RESULT (LIVE PROGRESS UPDATES) ---
-    async function checkResult() {
-        const plate = localStorage.getItem("lastPlate");
-        if(!plate) return;
-        
-        try {
-            const response = await fetch(`${SCRIPT_URL}?plate=${encodeURIComponent(plate)}`);
-            const data = await response.json();
-            const box = document.getElementById("statusBox");
-            
-            box.style.display = "block";
-
-            // 1. Ολοκληρώθηκε
-            if(data.status === "Ολοκληρώθηκε" || (data.results && data.results.length > 0)) {
-                clearInterval(checkTimer);
-                box.style.background = "#e8f5e9";
-                box.style.borderColor = "#81c784";
-                box.innerHTML = "<strong>✅ Η τιμολόγηση ολοκληρώθηκε!</strong><br><br>" + (data.results || "");
-            } 
-            // 2. Σφάλμα
-            else if(data.status && data.status.startsWith("Σφάλμα")) {
-                clearInterval(checkTimer);
-                box.style.background = "#ffebee";
-                box.style.borderColor = "#e57373";
-                box.innerHTML = "<strong>❌ Προέκυψε πρόβλημα:</strong><br>" + data.status;
-            } 
-            // 3. Ενδιάμεσα Βήματα
-            else if(data.status) {
-                box.style.background = "#f1f8ff";
-                box.style.borderColor = "#90caf9";
-                box.innerHTML = `
-                    <div class="status-container">
-                        <div class="spinner"></div>
-                        <div>
-                            <strong>Επεξεργασία σε εξέλιξη...</strong><br>
-                            <span>${data.status}</span>
-                            <br><small style="color:#666;">(Πινακίδα: ${plate})</small>
-                        </div>
-                    </div>
-                `;
-            }
-        } catch (err) { 
-            console.error("Error checking status:", err); 
-        }
-    }
-
-    // --- INIT ---
+    // INIT
     ["factory", "usage", "duration", "package"].forEach(id => loadDropdown(id, id));
     document.getElementById("factory").addEventListener("change", loadModels);
     document.getElementById("package").addEventListener("change", loadCovers);
